@@ -1,0 +1,51 @@
+fulfilment_center_id,fulfilment_center_name,city,state,capacity_orders_per_day
+,CFC Hobart 1,Hobart,TAS,7204
+CFC002,CFC Ballarat 2,Ballarat,VIC,7988
+,,Albany,WA,11288
+cfc004,,Townsville,QLD,8828
+CFC005,CFC Gold Coast 5,Gold Coast,QLD,14962
+CFC006,CFC Burnie 6,Burnie,TAS,7018
+CFC007,CFC Devonport 7,Devonport,TAS,12762
+CFC008,CFC Whyalla 8,Whyalla,SA,10726
+CFC009,CFC Whyalla 9,Whyalla,SA,3413
+CFC010,CFC Hobart 10,Hobart,TAS,12134
+CFC011,CFC Canberra 11,Canberra,,2881
+CFC012,CFC Newcastle 12,Newcastle,NSW,2899
+CFC013,CFC Wollongong 13,Wollongong,NSW,10594
+CFC014,CFC Bunbury 14,Bunbury,WA,11387
+CFC015,CFC Parramatta 15,Parramatta,NSW,9546
+CFC016,CFC Sydney 16,Sydney,NSW,7759
+CFC017,CFC Albany 17,Albany,WA,3670
+CFC018,CFC Port Augusta 18,Port Augusta,SA,8918
+,CFC Bendigo 19,Bendigo,VIC,4678
+CFC020,CFC Wollongong 20,Wollongong,,13175
+CFC021,CFC Port Augusta 21,Port Augusta,sa,4103
+CFC022,CFC Brisbane 22,Brisbane,QLD,6224
+CFC023,CFC Fremantle 23,Fremantle,WA,10629
+,CFC Darwin 24,Darwin,NT,10676
+CFC025,CFC Perth 25,Perth,WA,6822
+cfc026,CFC Whyalla 26,Whyalla,SA,7800
+CFC027,CFC Darwin 27,Darwin,NT,-100
+CFC028,CFC Sydney 28,Sydney,NSW,14191
+CFC029,CFC Geelong 29,Geelong,VIC,11093
+cfc030,CFC Geelong 30,Geelong,,4627
+CFC031,CFC Geelong 31,Geelong,VIC,5683
+CFC032,CFC Parramatta 32,Parramatta,NSW,12885
+CFC033,CFC Sydney 33,Sydney,NSW,10437
+CFC034,CFC Ballarat 34,Ballarat,VIC,8265
+CFC035,CFC Gold Coast 35,Gold Coast,QLD,10888
+CFC036,CFC Cairns 36,Cairns,QLD,6613
+CFC037,,Newcastle,NSW,5492
+CFC038,CFC Albany 38,Albany,WA,3514
+CFC039,CFC Albany 39,Albany,WA,14449
+CFC040,,Darwin,NT,5920
+CFC041,CFC Launceston 41,Launceston,TAS,
+CFC042,CFC Alice Springs 42,Alice Springs,NT,9787
+CFC043,CFC Devonport 43,Devonport,TAS,12168
+CFC044,CFC Canberra 44,Canberra,ACT,8083
+CFC045,CFC Alice Springs 45,Alice Springs,nt,14291
+CFC046,CFC Mount Gambier 46,Mount Gambier,SA,12418
+CFC047,CFC Melbourne 47,Melbourne,VIC,13102
+CFC048,CFC Perth 48,Perth,WA,13200
+CFC049,CFC Cairns 49,Cairns,QLD,2693
+CFC050,CFC Darwin 50,Darwin,NT,13714

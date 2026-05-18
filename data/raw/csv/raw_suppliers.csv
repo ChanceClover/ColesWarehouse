@@ -1,0 +1,51 @@
+supplier_id,supplier_name,supplier_type,city,state,lead_time_days
+SUP001,Aussie Supplier 1,Private Label,Adelaide,SA,21
+SUP002,Global Supplier 2,,Canberra,ACT,9
+SUP003,,Manufacturer,Newcastle,NSW,2
+SUP004,Global Supplier 4,National Distributor,Canberra,act,-3
+SUP005,National Supplier 5,National Distributor,Bendigo,VIC,14
+SUP006,Fresh Supplier 6,,Fremantle,WA,17
+SUP007,Prime Supplier 7,,Darwin,NT,4
+SUP008,Prime Supplier 8,Private Label,Melbourne,VIC,16
+SUP009,National Supplier 9,,Newcastle,NSW,
+SUP010,Fresh Supplier 10,Private Label,Hobart,TAS,8
+SUP011,Global Supplier 11,Imported Goods,Cairns,QLD,7
+SUP012,Global Supplier 12,Manufacturer,Darwin,NT,6
+SUP013,Global Supplier 13,Manufacturer,Ballarat,,7
+,Fresh Supplier 14,Imported Goods,Newcastle,NSW,4
+SUP015,Prime Supplier 15,Private Label,Newcastle,NSW,9
+,National Supplier 16,National Distributor,Ballarat,VIC,9
+SUP017,Aussie Supplier 17,National Distributor,Canberra,ACT,
+SUP018,Fresh Supplier 18,National Distributor,Port Augusta,SA,13
+SUP019,Fresh Supplier 19,Manufacturer,Melbourne,VIC,3
+SUP020,Fresh Supplier 20,Imported Goods,Devonport,TAS,2
+SUP021,Aussie Supplier 21,Imported Goods,Canberra,ACT,2
+SUP022,National Supplier 22,Private Label,Albany,WA,6
+,Fresh Supplier 23,Manufacturer,Cairns,QLD,11
+SUP024,Fresh Supplier 24,Imported Goods,Geelong,VIC,4
+SUP025,Prime Supplier 25,,Darwin,NT,13
+,National Supplier 26,Imported Goods,Port Augusta,SA,15
+SUP027,National Supplier 27,Private Label,Cairns,QLD,2
+SUP028,National Supplier 28,National Distributor,Parramatta,NSW,
+SUP029,Global Supplier 29,Local Farm,Canberra,ACT,11
+SUP030,National Supplier 30,Imported Goods,Perth,wa,6
+SUP031,Fresh Supplier 31,Manufacturer,Melbourne,VIC,5
+SUP032,National Supplier 32,,Burnie,TAS,1
+SUP033,Aussie Supplier 33,Imported Goods,Brisbane,QLD,2
+,Global Supplier 34,Local Farm,Melbourne,VIC,21
+SUP035,Aussie Supplier 35,Imported Goods,Wollongong,NSW,4
+,Global Supplier 36,National Distributor,Ballarat,VIC,12
+SUP037,Prime Supplier 37,National Distributor,Canberra,ACT,1
+SUP038,Global Supplier 38,Local Farm,Melbourne,vic,9
+SUP039,Fresh Supplier 39,,Bunbury,WA,12
+SUP040,Aussie Supplier 40,,Burnie,TAS,12
+SUP041,Aussie Supplier 41,Imported Goods,Alice Springs,NT,9
+SUP042,,,Canberra,ACT,6
+SUP043,National Supplier 43,,Canberra,ACT,
+SUP044,Fresh Supplier 44,,Newcastle,NSW,21
+SUP045,Prime Supplier 45,,Canberra,ACT,16
+SUP046,Fresh Supplier 46,,Brisbane,QLD,8
+SUP047,Prime Supplier 47,Private Label,Bendigo,,1
+SUP048,Prime Supplier 48,Local Farm,Bendigo,VIC,17
+SUP049,Fresh Supplier 49,National Distributor,Bunbury,WA,20
+SUP050,,Local Farm,Alice Springs,NT,10

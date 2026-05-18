@@ -1,0 +1,51 @@
+promotion_id,promotion_name,promotion_type,discount_rate,start_date,end_date
+PROM001,,Clearance,0.07,2025-08-03,26/07/2025
+PROM002,Weekend Promo 2,Free Delivery,0.4,01-29-2025,05/02/2025
+PROM003,,Free Delivery,0.07,09-24-2025,2025/10/12
+PROM004,Weekend Promo 4,Seasonal,0.19,13/06/2025,2025-07-26
+PROM005,Winter Promo 5,Loyalty Points,0.43,2025-08-02,28/09/2025
+PROM006,Winter Promo 6,Seasonal,0.27,07-13-2025,2025-07-08
+PROM007,Member Promo 7,Free Delivery,0.46,08-Apr-2025,04-13-2025
+PROM008,Weekend Promo 8,Clearance,0.38,10-01-2025,11-05-2025
+PROM009,Summer Promo 9,Seasonal,0.12,01-24-2025,11-Feb-2025
+PROM010,Weekend Promo 10,Clearance,0.27,13/09/2025,11-12-2025
+PROM011,Clearance Promo 11,Percentage Discount,0.08,2025-10-07,2025/11/28
+,Summer Promo 12,Clearance,0.35,19-Nov-2025,
+PROM013,Weekend Promo 13,Discountt,0.41,07/01/2025,2024-12-30
+PROM014,Weekend Promo 14,Loyalty Points,,04-May-2025,18/05/2025
+,Member Promo 15,Percentage Discount,0.09,2025/02/11,02-05-2025
+PROM016,Winter Promo 16,Free Delivery,0.07,2025-02-18,04-16-2025
+PROM017,,Seasonal,0.42,2025-10-16,10-Oct-2025
+PROM018,Winter Promo 18,Free Delivery,0.49,2025-07-19,16/09/2025
+PROM019,,Clearance,0.47,2025/06/24,03-Aug-2025
+PROM020,,Clearance,0.38,02-13-2025,2025-13-40
+PROM021,Summer Promo 21,Bundle,0.28,2025-13-40,21-Sep-2025
+PROM022,Summer Promo 22,Clearance,0.3,03/11/2025,04/12/2025
+PROM023,Weekend Promo 23,Percentage Discount,0.18,2025-03-28,04/04/2025
+PROM024,Winter Promo 24,Clearance,0.41,09-11-2025,2025/09/26
+PROM025,Clearance Promo 25,Bundle,0.23,11-01-2025,2025/11/08
+PROM026,Member Promo 26,Seasonal,0.13,,05/06/2025
+PROM027,Member Promo 27,Bundle,0.35,2025/05/30,2025-05-28
+PROM028,Clearance Promo 28,Free Delivery,,03-Nov-2025,2025-12-24
+PROM029,,Loyalty Points,0.05,05-08-2025,12-Jun-2025
+PROM030,Member Promo 30,Free Delivery,0.21,2025-10-22,11-09-2025
+PROM031,Winter Promo 31,Loyalty Points,0.27,2025/02/13,2025/02/17
+PROM032,,,0.38,03-Jun-2025,29/05/2025
+PROM033,Member Promo 33,Bundle,0.06,07-Aug-2025,2025/09/25
+PROM034,Winter Promo 34,Free Delivery,,19/07/2025,09/07/2025
+PROM035,Weekend Promo 35,Seasonal,,15-May-2025,07-06-2025
+PROM036,,Percentage Discount,0.28,2025/10/30,30-Oct-2025
+PROM037,Winter Promo 37,Clearance,0.43,06-Apr-2025,05-28-2025
+PROM038,Member Promo 38,Seasonal,0.27,2025/09/06,2025-09-13
+,Clearance Promo 39,Clearance,0.27,23-Apr-2025,2025-05-20
+PROM040,Summer Promo 40,Clearance,0.1,06/10/2025,2025-11-11
+PROM041,Summer Promo 41,Bundle,0.36,28-Jun-2025,29/06/2025
+PROM042,Clearance Promo 42,Loyalty Points,0.49,04-16-2025,05-02-2025
+PROM043,Member Promo 43,Loyalty Points,0.44,21/09/2025,09-23-2025
+PROM044,Weekend Promo 44,Clearance,0.45,2025-07-21,09-11-2025
+PROM045,Weekend Promo 45,,0.36,2025-07-08,2025/08/25
+PROM046,Weekend Promo 46,Loyalty Points,0.43,08-08-2025,
+PROM047,Winter Promo 47,Percentage Discount,0.5,09/01/2025,01-14-2025
+PROM048,,Percentage Discount,0.36,21/05/2025,2025-05-22
+PROM049,Winter Promo 49,Seasonal,0.36,2025/01/01,2025/01/18
+PROM050,,Loyalty Points,0.39,16/07/2025,17/07/2025

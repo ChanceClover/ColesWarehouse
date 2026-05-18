@@ -1,0 +1,51 @@
+store_id,store_name,store_type,city,state,region,store_area_sqm,staff_count,open_date
+ST001,Coles Melbourne 1,Liquor,Melbourne,VIC,Central,2528,-5,not_a_date
+ST002,Coles Canberra 2,Supermarket,Canberra,ACT,West,1436,101,2012-04-17
+ST003,Coles Devonport 3,LIQUOR,Devonport,TAS,West,,32,11/01/2011
+ST004,Coles Geelong 4,Online Hub,Geelong,VIC,East,3545,180,08-Aug-2011
+ST005,Coles Fremantle 5,LIQUOR,Fremantle,WA,East,3978,,12-31-2018
+ST006,Coles Launceston 6,LIQUOR,Launceston,TAS,South,3007,164,11-Aug-2019
+ST007,,Supermarket,Fremantle,WA,Metro,1060,167,01-Jul-2020
+ST008,Coles Sydney 8,Express,Sydney,NSW,East,2658,-5,2021-05-21
+ST009,Coles Mount Gambier 9,super market,Mount Gambier,SA,North,2801,,2015-05-16
+ST010,Coles Melbourne 10,super market,Melbourne,VIC,West,1476,170,29/06/2019
+ST010,Coles Albany 11,Express,Albany,WA,North,1062,165,04/06/2022
+ST012,,Supermarket,Sydney,,East,1677,161,2022/12/04
+ST013,,Express,Alice Springs,NT,Metro,3476,101,30/07/2015
+ST014,Coles Darwin 14,Liquor,Darwin,nt,North,3014,75,2013/09/24
+ST015,Coles Bunbury 15,Supermarket,Bunbury,WA,Regional,1968,157,30/11/2020
+ST016,Coles Perth 16,LIQUOR,Perth,,Central,2975,145,19/10/2011
+ST017,Coles Geelong 17,super market,Geelong,VIC,Central,,67,17/01/2017
+ST018,Coles Cairns 18,Supermarket,,,Central,2229,77,04-16-2018
+ST019,Coles Adelaide 19,LIQUOR,,SA,North,1436,169,09-22-2014
+ST020,Coles Port Augusta 20,Supermarket,Port Augusta ,SA,North,-100,82,2013/08/16
+ST021,Coles Canberra 21,LIQUOR,Canberra,ACT,Regional,3063,47,12-09-2010
+ST022,Coles Wollongong 22,Supermarket,Wollongong,NSW,Regional,3342,75,24/08/2013
+ST023,Coles Newcastle 23,Online Hub,Newcastle,NSW,Regional,1452,42,2018-07-31
+ST024,Coles Fremantle 24,Express,Fremantle,WA,South,,32,04-05-2016
+ST025,,Liquor,Canberra,ACT,North,2579,95,15-Oct-2019
+ST026,Coles Bendigo 26,Supermarket,Bendigo,vic,Metro,3839,65,2018/03/03
+ST027,Coles Devonport 27,Express,Devonport,TAS,East,2011,64,2019/06/07
+ST028,Coles Cairns 28,Express,Cairns,QLD,Central,2119,128,17-Oct-2014
+ST029,Coles Brisbane 29,super market,Brisbane,QLD,Regional,2071,65,
+ST030,Coles Bendigo 30,Liquor,Bendigo,VIC,West,3487,42,15/07/2019
+ST031,Coles Darwin 31,Supermarket,Darwin,NT,Metro,3089,128,2021/04/28
+ST032,Coles Darwin 32,Express,Darwin,NT,East,2935,76,2016/02/28
+ST033,Coles Mount Gambier 33,super market,,SA,Metro,1676,,2022/03/04
+ST034,Coles Bunbury 34,LIQUOR,Bunbury ,WA,East,2397,122,27-Jan-2022
+ST035,Coles Bunbury 35,Supermarket,Bunbury,WA,Regional,1476,47,2021-12-24
+ST036,Coles Sydney 36,Online Hub,Sydney,NSW,East,2138,112,2016/03/29
+st037,Coles Bendigo 37,Express,Bendigo,vic,North,1812,20,02/06/2013
+ST038,Coles Geelong 38,Express,Geelong,VIC,Metro,3985,94,2025-13-40
+ST039,Coles Canberra 39,super market,Canberra,ACT,North,2035,168,18-Sep-2012
+ST040,  Coles Burnie 40  ,Express,Burnie ,TAS,North,2283,132,2013/06/07
+ST041,Coles Port Augusta 41,super market,Port Augusta,SA,Regional,1942,77,03-Jun-2020
+st042,Coles Canberra 42,Liquor,Canberra,ACT,East,3241,85,2022-06-20
+ST043,Coles Perth 43,super market,Perth,WA,Metro,2635,38,07/08/2016
+ST044,Coles Albany 44,super market,Albany,WA,Metro,2241,84,11-16-2016
+ST045,Coles Albany 45,LIQUOR,Albany,WA,West,3214,149,05-21-2023
+ST046,Coles Albany 46,Supermarket,Albany,WA,North,3066,47,2021-01-04
+ST047,Coles Port Augusta 47,Supermarket,Port Augusta,SA,North,2441,162,16/03/2011
+ST048,,super market,Adelaide,SA,Regional,2645,91,2023/03/15
+ST049,Coles Sydney 49,Liquor,Sydney,,South,1441,,2016-07-13
+ST050,Coles Port Augusta 50,Express,Port Augusta,SA,Metro,1610,154,16/01/2015

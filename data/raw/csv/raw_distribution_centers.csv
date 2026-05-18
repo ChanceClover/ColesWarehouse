@@ -1,0 +1,51 @@
+distribution_center_id,distribution_center_name,city,state,warehouse_area_sqm
+DC001,Distribution Centre Gold Coast 1,Gold Coast,QLD,24162
+,Distribution Centre Alice Springs 2,Alice Springs,NT,32102
+DC003,Distribution Centre Burnie 3,Burnie,tas,73337
+DC004,Distribution Centre Whyalla 4,Whyalla,SA,15202
+DC005,Distribution Centre Port Augusta 5,Port Augusta,SA,50224
+DC006,,Alice Springs,NT,72441
+DC007,Distribution Centre Mount Gambier 7,Mount Gambier,SA,35191
+DC008,Distribution Centre Canberra 8,Canberra,ACT,26134
+DC009,Distribution Centre Canberra 9,Canberra,ACT,72193
+,Distribution Centre Newcastle 10,Newcastle,NSW,78872
+DC011,Distribution Centre Wollongong 11,Wollongong,NSW,68133
+DC012,Distribution Centre Gold Coast 12,Gold Coast,QLD,28839
+DC013,Distribution Centre Mount Gambier 13,Mount Gambier,SA,35122
+DC014,,Canberra,ACT,28255
+DC015,Distribution Centre Darwin 15,Darwin,NT,22082
+DC016,,Canberra,ACT,54969
+DC017,Distribution Centre Hobart 17,Hobart,TAS,15986
+DC018,,Port Augusta,SA,5942
+DC019,Distribution Centre Canberra 19,Canberra,ACT,38244
+DC020,Distribution Centre Port Augusta 20,Port Augusta,SA,31698
+DC021,Distribution Centre Canberra 21,Canberra,ACT,50135
+DC022,Distribution Centre Canberra 22,Canberra,ACT,26206
+DC023,Distribution Centre Geelong 23,Geelong,VIC,11822
+DC024,,Townsville,QLD,62065
+DC025,Distribution Centre Melbourne 25,Melbourne,VIC,57513
+DC026,Distribution Centre Adelaide 26,Adelaide,SA,31438
+dc027,Distribution Centre Mount Gambier 27,Mount Gambier,SA,9726
+DC028,Distribution Centre Launceston 28,Launceston,,51285
+DC029,Distribution Centre Canberra 29,Canberra,ACT,
+DC030,Distribution Centre Devonport 30,Devonport,TAS,57947
+DC031,Distribution Centre Wollongong 31,Wollongong,NSW,49560
+DC032,Distribution Centre Ballarat 32,Ballarat,VIC,54424
+DC033,Distribution Centre Darwin 33,Darwin,NT,8584
+DC034,Distribution Centre Darwin 34,Darwin,NT,35137
+DC035,Distribution Centre Burnie 35,Burnie,,17190
+,Distribution Centre Canberra 36,Canberra,ACT,40268
+DC037,Distribution Centre Gold Coast 37,Gold Coast,QLD,32102
+DC038,Distribution Centre Fremantle 38,Fremantle,WA,20712
+DC039,Distribution Centre Bendigo 39,Bendigo,VIC,
+DC040,Distribution Centre Burnie 40,Burnie,TAS,28969
+DC041,Distribution Centre Port Augusta 41,Port Augusta,,75879
+DC042,Distribution Centre Wollongong 42,Wollongong,NSW,72922
+DC043,,Alice Springs,NT,52395
+DC044,Distribution Centre Mount Gambier 44,Mount Gambier,SA,52962
+DC045,Distribution Centre Townsville 45,Townsville,QLD,57506
+DC046,Distribution Centre Port Augusta 46,Port Augusta,SA,18090
+DC047,Distribution Centre Mount Gambier 47,Mount Gambier,SA,24601
+DC048,Distribution Centre Darwin 48,Darwin,NT,72765
+DC049,Distribution Centre Burnie 49,Burnie,TAS,26409
+DC050,Distribution Centre Newcastle 50,Newcastle,NSW,48864

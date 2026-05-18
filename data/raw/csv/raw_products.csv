@@ -1,0 +1,51 @@
+product_id,product_name,brand,category,subcategory,unit_price,unit_cost,is_active
+prd0001,BakerLane Bread 1,CafeGold,Bakery,Bread,7.81,,0
+,BakerLane Frozen Meal 2,AussieFarm,Frozen,Frozen Meal,35.72,43.62,FALSE
+PRD0003,FreshCo Chicken 3,HomeBasics,Meat & Seafood,Chicken,44.68,14.5,0
+PRD0004,Coles Cheese 4,GreenLeaf,Dairy,Cheese,50.59,9.56,
+PRD0005,CafeGold Pastry 5,DailyDairy,Misc,,10.72,22.68,1
+PRD0006,CafeGold Ice Cream 6,GreenLeaf,Frozen,Ice Cream,69.33,35.66,TRUE
+PRD0007,Coles Fish 7,BakerLane,Meat & Seafood,Fish,61.39,42.01,No
+PRD0008,UNKNOWN,CafeGold,Pantry,Canned Food,40.38,,0
+ PRD0009 ,Coles Cheese 9,,Dairy,Cheese,68.36,38.74,TRUE
+PRD0010,CafeGold Fish 10,Coles,Meat & Seafood,Fish,8.59,34.34,N
+PRD0011,,BakerLane,Household,Cleaning,63.71,4.01,TRUE
+PRD0012,AussieFarm Pasta 12,BakerLane,Misc,Pasta,13.9,15.88,1
+PRD0013,BakerLane Coffee 13,,Beverages,Coffee,24.68,29.79,1
+PRD0014,Coles Salad 14,CafeGold,Fresh Produce,Salad,16.43,34.12,Yes
+PRD0015,BakerLane Yoghurt 15,Coles,dairy,Yoghurt,17.26,39.5,0
+PRD0016,CafeGold Frozen Meal 16,BakerLane,Frozen,,58.35,43.54,
+PRD0017,Coles Beef 17,FreshCo,Meat & Seafood,Beef,51.63,30.53,FALSE
+PRD0018,GreenLeaf Salad 18,DailyDairy,Fresh Produce,Salad,10.66,-5,1
+,OceanBest Cleaning 19,GreenLeaf,Household,Cleaning,66.94,42.29,1
+PRD0020,CafeGold Salad 20,homebasics,Fresh Produce,Salad,6.25,43.59,FALSE
+PRD0020,,DailyDairy,Dairy,Yoghurt,47.53,10.87,Yes
+PRD0022,AussieFarm Vegetables 22,GreenLeaf,,Vegetables,63.39,1.2,1
+PRD0023,,CafeGold,Fresh Produce,fruit,49.79,40.94,
+PRD0024,,OceanBest,Frozen,Ice Cream,-10,7.1,Yes
+PRD0025,GreenLeaf Frozen Veg 25,OceanBest,Frozen,Frozen Veg,10.48,39.56,
+PRD0026,DailyDairy Pasta 26,CafeGold,Misc,Pasta,76.36,21.6,N
+PRD0027,HomeBasics Milk 27,GreenLeaf,Dairy,Milk,29.26,33.89,Y
+PRD0028,FreshCo Frozen Veg 28,DailyDairy,Frozen,frozen veg,61.36,36.42,
+PRD0029,,BakerLane,Fresh Produce,Salad,6.96,43.75,N
+PRD0030,HomeBasics Pasta 30,BakerLane,Pantry,,60.72,-5,1
+PRD0031,CafeGold Pet Care 31,,Misc,Pet Care,18.81,2.94,No
+PRD0032,BakerLane Frozen Meal 32,FreshCo,Frozen,Frozen Meal,19.56,30.23,0
+PRD0033,Coles Cheese 33,CafeGold,Dairy,Cheese,34.29,1.43,0
+PRD0034,,DailyDairy,Bakery,Cake,28.15,7.98,
+PRD0035,HomeBasics Yoghurt 35,,Dairy,Yoghurt,52.96,34.89,FALSE
+PRD0036,CafeGold Pet Care 36,HomeBasics,Misc,Pet Care,47.93,3.8,FALSE
+prd0037,FreshCo Cleaning 37,FreshCo,Household,Cleaning,4.72,25.94,No
+PRD0038,AussieFarm Fish 38,CafeGold,Meat & Seafood,Fish,52.22,,FALSE
+PRD0039,AussieFarm Pet Care 39,BakerLane,Household,Pet Care,52.31,-5,
+PRD0040,AussieFarm Soft Drink 40,AussieFarm,Beverages,Soft Drink,57.14,25.37,0
+PRD0041,UNKNOWN,OceanBest,Bakery,Cake,75.89,10.58,Yes
+PRD0042,FreshCo Bread 42,,Bakery,Bread,13.61,31.33,Yes
+PRD0043,DailyDairy Cleaning 43,BakerLane,Household,Cleaning,72.46,30.68,FALSE
+PRD0044,GreenLeaf Paper Goods 44,AussieFarm,Household,Paper Goods,70.12,5.07,
+,BakerLane Cheese 45,GreenLeaf,,Cheese,74.54,18.14,0
+PRD0046,HomeBasics Pasta 46,HomeBasics,Pantry,Pasta,24.02,31.48,Yes
+PRD0047,,AussieFarm,Household,Paper Goods,20.15,11.11,FALSE
+PRD0048,CafeGold Milk 48,Coles,Dairy,Milk,,19.04,N
+PRD0049,GreenLeaf Beef 49,,Misc,Beef,2.78,15.84,N
+prd0050,AussieFarm Beef 50,CafeGold,Meat & Seafood,,,-5,Y

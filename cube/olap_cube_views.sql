@@ -1,0 +1,168 @@
+-- OLAP-style cube views for Power BI or SQL analysis.
+-- Run this script against output/coles_warehouse_dw.sqlite after the ETL.
+
+DROP VIEW IF EXISTS vw_cube_sales;
+DROP VIEW IF EXISTS vw_cube_online_orders;
+DROP VIEW IF EXISTS vw_cube_inventory;
+DROP VIEW IF EXISTS vw_cube_delivery;
+DROP VIEW IF EXISTS vw_cube_procurement;
+
+CREATE VIEW vw_cube_sales AS
+SELECT
+    fs.sales_key,
+    fs.transaction_id,
+    dd.full_date,
+    dd.year,
+    dd.quarter,
+    dd.month,
+    dd.month_name,
+    ds.store_id,
+    ds.store_name,
+    ds.store_type,
+    ds.city AS store_city,
+    ds.state AS store_state,
+    ds.region,
+    dp.product_id,
+    dp.product_name,
+    dp.brand,
+    dp.category,
+    dp.subcategory,
+    dc.customer_id,
+    dc.gender,
+    dc.age_group,
+    dc.membership_type,
+    dpr.promotion_type,
+    dpm.payment_type,
+    dch.channel_name,
+    dch.channel_group,
+    fs.quantity_sold,
+    fs.total_sales_amount,
+    fs.discount_amount,
+    fs.net_sales,
+    fs.sales_cost,
+    fs.gross_profit,
+    fs.currency
+FROM fact_sales fs
+JOIN dim_date dd ON dd.date_key = fs.date_key
+JOIN dim_store ds ON ds.store_key = fs.store_key
+JOIN dim_product dp ON dp.product_key = fs.product_key
+JOIN dim_customer dc ON dc.customer_key = fs.customer_key
+LEFT JOIN dim_promotion dpr ON dpr.promotion_key = fs.promotion_key
+JOIN dim_payment_method dpm ON dpm.payment_method_key = fs.payment_method_key
+JOIN dim_channel dch ON dch.channel_key = fs.channel_key;
+
+CREATE VIEW vw_cube_online_orders AS
+SELECT
+    foo.online_order_key,
+    foo.online_order_id,
+    dd.full_date,
+    dd.year,
+    dd.quarter,
+    dd.month,
+    dd.month_name,
+    dc.customer_id,
+    dc.gender,
+    dc.age_group,
+    dc.membership_type,
+    dfc.fulfilment_center_id,
+    dfc.fulfilment_center_name,
+    dfc.city AS fulfilment_city,
+    dfc.state AS fulfilment_state,
+    dch.channel_name,
+    dch.channel_group,
+    foo.item_count,
+    foo.order_value,
+    foo.delivery_fee,
+    foo.order_status,
+    foo.fulfilled_flag
+FROM fact_online_orders foo
+JOIN dim_date dd ON dd.date_key = foo.order_date_key
+JOIN dim_customer dc ON dc.customer_key = foo.customer_key
+JOIN dim_fulfilment_center dfc ON dfc.fulfilment_center_key = foo.fulfilment_center_key
+JOIN dim_channel dch ON dch.channel_key = foo.channel_key;
+
+CREATE VIEW vw_cube_inventory AS
+SELECT
+    fid.inventory_key,
+    fid.inventory_record_id,
+    dd.full_date,
+    dd.year,
+    dd.quarter,
+    dd.month,
+    dd.month_name,
+    ds.store_id,
+    ds.store_name,
+    ds.city AS store_city,
+    ds.state AS store_state,
+    ds.region,
+    dp.product_id,
+    dp.product_name,
+    dp.category,
+    dp.subcategory,
+    fid.opening_stock,
+    fid.stock_in,
+    fid.stock_out,
+    fid.stock_loss,
+    fid.closing_stock,
+    fid.calculated_closing_stock,
+    fid.stock_variance
+FROM fact_inventory_daily fid
+JOIN dim_date dd ON dd.date_key = fid.snapshot_date_key
+JOIN dim_store ds ON ds.store_key = fid.store_key
+JOIN dim_product dp ON dp.product_key = fid.product_key;
+
+CREATE VIEW vw_cube_delivery AS
+SELECT
+    fdp.delivery_key,
+    fdp.delivery_id,
+    foo.online_order_id,
+    promised.full_date AS promised_delivery_date,
+    actual.full_date AS actual_delivery_date,
+    actual.year,
+    actual.quarter,
+    actual.month,
+    actual.month_name,
+    fdp.delivery_partner,
+    fdp.delivery_status,
+    fdp.delivery_time_minutes,
+    fdp.delay_minutes,
+    fdp.on_time_flag,
+    fdp.order_accuracy_flag,
+    dch.channel_name,
+    dfc.fulfilment_center_name,
+    dfc.state AS fulfilment_state
+FROM fact_delivery_performance fdp
+JOIN fact_online_orders foo ON foo.online_order_key = fdp.online_order_key
+JOIN dim_date promised ON promised.date_key = fdp.promised_date_key
+JOIN dim_date actual ON actual.date_key = fdp.actual_date_key
+JOIN dim_channel dch ON dch.channel_key = foo.channel_key
+JOIN dim_fulfilment_center dfc ON dfc.fulfilment_center_key = foo.fulfilment_center_key;
+
+CREATE VIEW vw_cube_procurement AS
+SELECT
+    fp.procurement_key,
+    fp.purchase_order_id,
+    dd.full_date AS purchase_order_date,
+    dd.year,
+    dd.quarter,
+    dd.month,
+    dd.month_name,
+    ds.supplier_id,
+    ds.supplier_name,
+    ds.supplier_type,
+    ddc.distribution_center_id,
+    ddc.distribution_center_name,
+    ddc.state AS distribution_state,
+    dp.product_id,
+    dp.product_name,
+    dp.category,
+    fp.ordered_qty,
+    fp.received_qty,
+    fp.purchase_amount,
+    fp.late_delivery_flag,
+    fp.po_status
+FROM fact_procurement fp
+JOIN dim_date dd ON dd.date_key = fp.purchase_order_date_key
+JOIN dim_supplier ds ON ds.supplier_key = fp.supplier_key
+JOIN dim_distribution_center ddc ON ddc.distribution_center_key = fp.distribution_center_key
+JOIN dim_product dp ON dp.product_key = fp.product_key;

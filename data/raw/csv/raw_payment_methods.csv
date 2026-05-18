@@ -1,0 +1,51 @@
+payment_method_id,payment_type,provider,is_online_supported
+pay001,Digital Wallet,Cash Counter,No
+PAY002,BNPL,,No
+PAY003,Cash,Mastercard,1
+PAY004,Debit Card,Amex,No
+PAY005,Debit Card,Afterpay,Y
+PAY006,Bank Transfer,PayPal,
+PAY007,Digital Wallet,Afterpay,Y
+PAY008,Bank Transfer,,1
+PAY009,Cash,Mastercard,
+PAY010,Cash,Amex,1
+PAY011,Bank Transfer,Amex,0
+pay012,bank transfer,PayPal,Y
+PAY013,Cash,Afterpay,
+PAY014,Bank Transfer,Mastercard,
+PAY015,Digital Wallet,Afterpay,N
+PAY016,Digital Wallet,Amex,
+PAY017,Debit Card,Mastercard,TRUE
+PAY018,BNPL,PayPal,Y
+,,Afterpay,Yes
+,Cash,Amex,0
+PAY021,Debit Card,Afterpay,Yes
+PAY022,Debit Card,Afterpay,N
+PAY023,Bank Transfer,Coles Gift,TRUE
+pay024,Digital Wallet,Mastercard,0
+PAY025,,Cash Counter,Yes
+PAY026,Debit Card,Mastercard,No
+PAY027,,PayPal,Y
+PAY028,Gift Card,Amex,Y
+PAY029,Digital Wallet,Coles Gift,No
+PAY030,Debit Card,Cash Counter,TRUE
+,,Amex,No
+PAY032,Card ,Mastercard,0
+PAY033,Bank Transfer,Cash Counter,N
+PAY034,Digital Wallet,Afterpay,TRUE
+PAY035,BNPL,,No
+PAY036,BNPL,PayPal,Yes
+PAY037,cash,Visa,FALSE
+PAY038,Cash,Afterpay,N
+PAY039,Credit Card,,Y
+PAY040,,Coles Gift,FALSE
+PAY041,,Amex,1
+PAY042,,PayPal,TRUE
+PAY043,Debit Card,Coles Gift,FALSE
+PAY044,Debit Card,PayPal,Yes
+PAY045,,Amex,0
+PAY046,Gift Card,Cash Counter,No
+PAY047,Gift Card,Mastercard,N
+PAY048,Credit Card,Visa,No
+PAY049,Bank Transfer,PayPal,FALSE
+PAY050,Gift Card,Afterpay,Yes

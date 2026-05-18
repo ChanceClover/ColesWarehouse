@@ -1,0 +1,51 @@
+channel_id,channel_name,channel_group,description
+CH001,Physical Store,,
+CH002,Mobile App,Online,Mobile App sales channel
+,Physical Store,online,
+CH004,Physical Store,Offline,Physical Store sales channel
+CH005,Physical Store,Online,Physical Store sales channel
+CH006,Click & Collect,Offline,Click & Collect sales channel
+CH007,Mobile App,online,Mobile App sales channel
+CH008,Home Delivery,Online,Home Delivery sales channel
+CH009,Click & Collect,Offline,
+CH010,Mobile App,online,
+CH011,Online,Online,
+CH012,eCommerce,Online,
+CH013,Mobile App,Omnichannel,
+CH014,Mobile App,,
+CH015,Click & Collect,Omnichannel,
+,Online,,
+CH017,Mobile App,Offline,Mobile App sales channel
+CH018,eCommerce,Offline,eCommerce sales channel
+CH019,Mobile App,Omnichannel,Mobile App sales channel
+CH020,eCommerce,Omnichannel,
+CH021,Physical Store,,
+CH022,eCommerce,online,
+CH023,,Online,
+,,Online,
+CH025,eCommerce,Omnichannel,eCommerce sales channel
+CH026,Physical Store,Online,Physical Store sales channel
+CH027,Mobile App,Omnichannel,
+CH028,Home Delivery,Omnichannel,Home Delivery sales channel
+CH029,eCommerce,online,
+CH030,Click & Collect,,
+CH031,eCommerce,online,
+CH032,Click & Collect,,
+ch033,Mobile App,,Mobile App sales channel
+,Mobile App,Offline,Mobile App sales channel
+CH035,Click & Collect,Offline,
+CH036,Click & Collect,Online,
+CH037,Physical Store,Offline,Physical Store sales channel
+CH038,Home Delivery,Online,
+CH039,Home Delivery,online,Home Delivery sales channel
+CH040,Home Delivery,Online,Home Delivery sales channel
+,Home Delivery,Omnichannel,
+,Physical Store,Online,
+CH043,Physical Store,Offline,
+CH044,Mobile App,Offline,
+CH045,eCommerce,Offline,eCommerce sales channel
+CH046,Click & Collect,,
+CH047,Mobile App,Online,Mobile App sales channel
+CH048,Physical Store,online,Physical Store sales channel
+CH049,Physical Store,Omnichannel,
+CH050,,Online,

@@ -1,0 +1,51 @@
+customer_id,gender,birth_year,membership_type,city,email,join_date
+CUST0001,F,2005,Platinum,Newcastle,user1@example.com,2022-01-02
+CUST0002,Female,2000,SILVER,Burnie,user2@example.com,20/10/2021
+CUST0003,F,1999,Bronze,Fremantle,user3@example.com,02-13-2024
+cust0004,F,1999,Silver,Devonport,user4@example.com,15-Dec-2021
+CUST0005,Male,2035,Silver,Sydney,user5@example.com,2022-11-30
+CUST0005,Unknown,1949,Silver,Launceston,user6@example.com,2022-12-24
+CUST0007,,1980,Gold,,user7@example.com,05-May-2022
+CUST0008,,1981,,Ballarat,user8@example.com,26/01/2023
+CUST0009,Female,1985,gold,,user9@example.com,08/10/2019
+CUST0010,Female,1962,Gold,Darwin,user10@example.com,06-02-2024
+CUST0011,Other,1956,Bronze,Gold Coast,user11@example.com,15-May-2023
+CUST0012,Female,1985,Bronze,Albany,user12@example.com,10-Jun-2019
+CUST0013,Other,1952,Bronze,Adelaide,user13@example.com,14/08/2021
+CUST0014,F,1977,Gold,Hobart,user14@example.com,01-04-2025
+cust0015,Other,1964,Silver,Launceston,user15@example.com,
+cust0016,F,1998,None,Bunbury,user16@example.com,03-14-2025
+CUST0017,,1954,None,Geelong,user17@example.com,04-15-2020
+CUST0018,Unknown,1989,SILVER,Melbourne,user18@example.com,03-11-2019
+CUST0019,,1957,None,Gold Coast,user19@example.com,09/09/2022
+CUST0020,Unknown,1985,Gold,Canberra,user20@example.com,2023/03/28
+CUST0021,Female,2009,,Bendigo,user21@example.com,07-27-2018
+CUST0022,,1946,Bronze,Fremantle,user22@example.com,2022/02/07
+CUST0023,M,1981,Bronze,Perth,user23@example.com,19-Feb-2021
+,,1988,gold,Canberra,user24@example.com,
+CUST0025,Unknown,2003,Silver,Port Augusta,,2019/10/28
+CUST0026,F,2009,,Devonport,user26@example.com,03-10-2018
+,F,1948,,Brisbane,user27@example.com,27-Jun-2024
+,Other,1993,Silver,Alice Springs,user28@example.com,2020-02-21
+CUST0029,,1997,,Burnie,user29@example.com,26/10/2023
+CUST0030,,1985,Silver,Albany,user30@example.com,12-22-2021
+CUST0031,M,1983,Gold,Gold Coast,user31@example.com,06-26-2023
+CUST0032,F,1993,SILVER,Alice Springs,user32@example.com,
+CUST0033,,2006,Gold,Ballarat,user33@example.com,04-21-2024
+CUST0034,M,1973,Gold,,user34@example.com,not_a_date
+CUST0035,,1970,Platinum,Cairns,user35@example.com,25-Apr-2025
+CUST0036,Male,1967,SILVER,Alice Springs,user36@example.com,2022/06/15
+CUST0037,F,1946,Platinum,Whyalla,user37@example.com,10-04-2021
+CUST0038,,1962,,Brisbane,user38example.com,02-23-2023
+,F,1969,Silver,Port Augusta,user39@example.com,18-Oct-2022
+CUST0040,Female,1962,,Cairns,,2020/08/22
+CUST0041,F,1946,Platinum,Hobart,user41@example.com,2025-06-28
+CUST0042,F,1982,gold,Port Augusta,user42@example.com,13/05/2023
+CUST0043,Unknown,2005,Gold,Canberra,user43@example.com,02-Dec-2018
+CUST0044,Female,1959,None,Alice Springs,user44@example.com,03-Jun-2024
+CUST0045,,1971,,Wollongong,user45@example.com,2018/08/16
+CUST0046,Male,1984,None,Perth,user46example.com,2025-13-40
+CUST0047,Male,1953,,Newcastle,user47@example.com,2019/07/09
+CUST0048,,1993,SILVER,Wollongong,user48@example.com,18/01/2024
+CUST0049,Other,1995,Silver,Burnie,user49@example.com,04-04-2018
+CUST0050,,1974,Gold,Albany,user50@example.com,2019-04-08
