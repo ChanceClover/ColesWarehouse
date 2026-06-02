@@ -22,6 +22,8 @@ Export Power BI-ready CSV files:
 python .\powerbi\export_powerbi.py
 ```
 
+`export_powerbi.py` also creates or refreshes the cube views automatically, so the separate cube command is optional.
+
 The CSV files are created in:
 
 `output\powerbi`
@@ -48,6 +50,14 @@ For the proper star schema model, import these tables:
 
 Use one-to-many relationships from dimensions to facts. Keep relationship direction single from dimension to fact.
 
+For an ETL health page, also import:
+
+- `etl_load_batch`
+- `etl_audit_log`
+- `etl_error_log`
+- `data_quality_issue`
+- `map_standard_value`
+
 ## Quick Cube Option
 
 For fast dashboard building, import the cube views:
@@ -59,3 +69,7 @@ For fast dashboard building, import the cube views:
 - `vw_cube_procurement`
 
 These are flattened analytical views. They are easier for screenshots and demonstrations, but the star schema is better for explaining data warehouse design.
+
+## Exported Transform Tables
+
+The export also includes `trf_*` tables. They are not required for the main dashboard, but they are useful when explaining the ETL process because they show the clean transform layer between staging and final warehouse tables.

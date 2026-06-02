@@ -38,3 +38,21 @@ Power BI may warn about multiple date relationships. Keep one active date relati
 - `dim_supplier[supplier_key]` -> `fact_procurement[supplier_key]`
 - `dim_distribution_center[distribution_center_key]` -> `fact_procurement[distribution_center_key]`
 - `dim_product[product_key]` -> `fact_procurement[product_key]`
+
+## ETL Health
+
+These tables are usually kept disconnected, then used on a separate ETL health page:
+
+- `etl_load_batch`
+- `etl_audit_log`
+- `etl_error_log`
+- `data_quality_issue`
+- `map_standard_value`
+
+If you want batch-level filtering, create relationships from `etl_load_batch[batch_id]` to:
+
+- `etl_audit_log[batch_id]`
+- `etl_error_log[batch_id]`
+- `data_quality_issue[batch_id]`
+
+Keep these relationships separate from the business star schema to avoid confusing business filters with ETL-process filters.

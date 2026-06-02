@@ -1,0 +1,5 @@
+﻿dimension_name,current_rows,historical_rows
+dim_store,50,0
+dim_product,38,0
+dim_customer,45,0
+dim_supplier,40,0

@@ -100,6 +100,11 @@ def main():
     parser = argparse.ArgumentParser(description="Run Coles data warehouse ETL.")
     parser.add_argument("--source", default=str(DEFAULT_SOURCE), help="Dirty source SQLite database.")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT), help="Output data warehouse SQLite database.")
+    parser.add_argument(
+        "--incremental",
+        action="store_true",
+        help="Keep an existing warehouse and append only new natural-key fact rows.",
+    )
     args = parser.parse_args()
 
     source = Path(args.source)
@@ -108,11 +113,21 @@ def main():
         raise FileNotFoundError(f"Source database not found: {source}")
 
     output.parent.mkdir(parents=True, exist_ok=True)
-    if output.exists():
-        output.unlink()
+    if output.exists() and not args.incremental:
+        try:
+            output.unlink()
+        except PermissionError as exc:
+            raise PermissionError(
+                f"Cannot rebuild because the warehouse database is open or locked: {output}. "
+                "Close DB Browser for SQLite, Power BI, or any app using the file, then run the command again. "
+                "You can also use --incremental if you do not need a clean rebuild."
+            ) from exc
 
+    batch_id = datetime.now().strftime("BATCH_%Y%m%d_%H%M%S")
     conn = sqlite3.connect(output)
     register_functions(conn)
+    conn.create_function("BATCH_ID", 0, lambda: batch_id)
+    conn.create_function("RUN_MODE", 0, lambda: "INCREMENTAL" if args.incremental else "REBUILD")
     conn.execute("PRAGMA foreign_keys = ON;")
     conn.execute("ATTACH DATABASE ? AS raw;", (str(source),))
 
@@ -120,6 +135,7 @@ def main():
         for script_name in (
             "01_schema.sql",
             "02_staging.sql",
+            "03_transform.sql",
             "03_load_dimensions.sql",
             "04_load_facts.sql",
         ):
@@ -129,6 +145,7 @@ def main():
             conn.commit()
 
         print(f"ETL complete: {output}")
+        print(f"Batch: {batch_id} ({'incremental' if args.incremental else 'rebuild'})")
         print("Run sql/05_validation.sql for quality checks and sample analysis.")
     finally:
         conn.close()

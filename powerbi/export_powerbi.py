@@ -6,8 +6,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DB_PATH = ROOT / "output" / "coles_warehouse_dw.sqlite"
 EXPORT_DIR = ROOT / "output" / "powerbi"
+CUBE_SQL_PATH = ROOT / "cube" / "olap_cube_views.sql"
 
 TABLES = [
+    "etl_load_batch",
+    "etl_audit_log",
+    "etl_error_log",
+    "data_quality_issue",
+    "map_standard_value",
     "dim_date",
     "dim_store",
     "dim_product",
@@ -23,6 +29,20 @@ TABLES = [
     "fact_inventory_daily",
     "fact_delivery_performance",
     "fact_procurement",
+    "trf_stores",
+    "trf_products",
+    "trf_customers",
+    "trf_promotions",
+    "trf_payment_methods",
+    "trf_channels",
+    "trf_suppliers",
+    "trf_fulfilment_centers",
+    "trf_distribution_centers",
+    "trf_sales",
+    "trf_online_orders",
+    "trf_inventory",
+    "trf_delivery",
+    "trf_procurement",
     "vw_cube_sales",
     "vw_cube_online_orders",
     "vw_cube_inventory",
@@ -52,6 +72,10 @@ def main():
 
     conn = sqlite3.connect(DB_PATH)
     try:
+        if CUBE_SQL_PATH.exists():
+            conn.executescript(CUBE_SQL_PATH.read_text(encoding="utf-8"))
+            conn.commit()
+
         existing = {
             row[0]
             for row in conn.execute(

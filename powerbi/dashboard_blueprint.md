@@ -29,7 +29,7 @@ Purpose: Track stock movement and stock variance.
 
 Visuals:
 
-- KPI cards: `Closing Stock`, `Stock Variance`
+- KPI cards: `Closing Stock`, `Stock Variance`, `Average Shrinkage %`
 - Line chart: closing stock by month
 - Bar chart: stock loss by region
 - Table: product/store combinations with largest stock variance
@@ -40,7 +40,7 @@ Purpose: Evaluate online order fulfillment and delivery reliability.
 
 Visuals:
 
-- KPI cards: `Fulfillment Rate %`, `On Time Delivery %`, `Average Delay Minutes`
+- KPI cards: `Fulfillment Rate %`, `On Time Delivery %`, `Average Delay Hours`
 - Bar chart: deliveries by delivery status
 - Column chart: on-time delivery by fulfilment center
 - Table: late deliveries with delay minutes
@@ -51,7 +51,19 @@ Purpose: Analyze supplier performance and purchasing cost.
 
 Visuals:
 
-- KPI cards: `Total Purchase Amount`, `Late Procurement %`
+- KPI cards: `Total Purchase Amount`, `Late Procurement %`, `Average Supplier Fill Rate %`
 - Bar chart: purchase amount by supplier
 - Bar chart: late delivery percentage by supplier
 - Matrix: supplier type x product category
+
+## Page 6: ETL Health
+
+Purpose: Show that the warehouse has traceable loads, quality checks, and rejected-row handling.
+
+Visuals:
+
+- KPI cards: `Data Quality Issues`, `Hard Rejects`, `Lookup Warnings`
+- Table: latest `etl_load_batch` records with run mode and status
+- Bar chart: issue count by `data_quality_issue[issue_code]`
+- Matrix: `data_quality_issue[layer_name]` x `data_quality_issue[severity]`
+- Table: `etl_audit_log` process counts

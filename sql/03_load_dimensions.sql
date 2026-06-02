@@ -1,28 +1,14 @@
-INSERT INTO etl_error_log (source_table, source_id, error_type, error_description)
-SELECT 'raw_stores', raw_store_id, 'STAGING_REJECT', error_reason FROM stg_stores WHERE is_valid = 0;
-INSERT INTO etl_error_log (source_table, source_id, error_type, error_description)
-SELECT 'raw_products', product_id, 'STAGING_REJECT', error_reason FROM stg_products WHERE is_valid = 0;
-INSERT INTO etl_error_log (source_table, source_id, error_type, error_description)
-SELECT 'raw_customers', customer_id, 'STAGING_REJECT', error_reason FROM stg_customers WHERE is_valid = 0;
-INSERT INTO etl_error_log (source_table, source_id, error_type, error_description)
-SELECT 'raw_promotions', promotion_id, 'STAGING_REJECT', error_reason FROM stg_promotions WHERE is_valid = 0;
-INSERT INTO etl_error_log (source_table, source_id, error_type, error_description)
-SELECT 'raw_payment_methods', payment_method_id, 'STAGING_REJECT', error_reason FROM stg_payment_methods WHERE is_valid = 0;
-INSERT INTO etl_error_log (source_table, source_id, error_type, error_description)
-SELECT 'raw_channels', channel_id, 'STAGING_REJECT', error_reason FROM stg_channels WHERE is_valid = 0;
-INSERT INTO etl_error_log (source_table, source_id, error_type, error_description)
-SELECT 'raw_suppliers', supplier_id, 'STAGING_REJECT', error_reason FROM stg_suppliers WHERE is_valid = 0;
-INSERT INTO etl_error_log (source_table, source_id, error_type, error_description)
-SELECT 'raw_fulfilment_centers', fulfilment_center_id, 'STAGING_REJECT', error_reason FROM stg_fulfilment_centers WHERE is_valid = 0;
-INSERT INTO etl_error_log (source_table, source_id, error_type, error_description)
-SELECT 'raw_distribution_centers', distribution_center_id, 'STAGING_REJECT', error_reason FROM stg_distribution_centers WHERE is_valid = 0;
-
-INSERT INTO dim_date (date_key, full_date, year, quarter, month, month_name, day, day_of_week)
+INSERT OR IGNORE INTO dim_date (
+    date_key, full_date, year, quarter, quarter_name, month, month_name, year_month,
+    week_number, day, day_of_week, day_of_week_number, is_weekend,
+    month_start_date, month_end_date, fiscal_year, fiscal_quarter, load_batch_id
+)
 SELECT DISTINCT
     CAST(strftime('%Y%m%d', full_date) AS INTEGER) AS date_key,
     full_date,
     CAST(strftime('%Y', full_date) AS INTEGER) AS year,
     ((CAST(strftime('%m', full_date) AS INTEGER) - 1) / 3) + 1 AS quarter,
+    'Q' || (((CAST(strftime('%m', full_date) AS INTEGER) - 1) / 3) + 1) AS quarter_name,
     CAST(strftime('%m', full_date) AS INTEGER) AS month,
     CASE strftime('%m', full_date)
         WHEN '01' THEN 'January' WHEN '02' THEN 'February' WHEN '03' THEN 'March'
@@ -30,71 +16,223 @@ SELECT DISTINCT
         WHEN '07' THEN 'July' WHEN '08' THEN 'August' WHEN '09' THEN 'September'
         WHEN '10' THEN 'October' WHEN '11' THEN 'November' WHEN '12' THEN 'December'
     END AS month_name,
+    strftime('%Y-%m', full_date) AS year_month,
+    CAST(strftime('%W', full_date) AS INTEGER) AS week_number,
     CAST(strftime('%d', full_date) AS INTEGER) AS day,
     CASE strftime('%w', full_date)
         WHEN '0' THEN 'Sunday' WHEN '1' THEN 'Monday' WHEN '2' THEN 'Tuesday'
         WHEN '3' THEN 'Wednesday' WHEN '4' THEN 'Thursday' WHEN '5' THEN 'Friday'
         WHEN '6' THEN 'Saturday'
-    END AS day_of_week
+    END AS day_of_week,
+    CAST(strftime('%w', full_date) AS INTEGER) AS day_of_week_number,
+    CASE WHEN strftime('%w', full_date) IN ('0', '6') THEN 1 ELSE 0 END AS is_weekend,
+    date(full_date, 'start of month') AS month_start_date,
+    date(full_date, 'start of month', '+1 month', '-1 day') AS month_end_date,
+    CASE
+        WHEN CAST(strftime('%m', full_date) AS INTEGER) >= 7 THEN CAST(strftime('%Y', full_date) AS INTEGER) + 1
+        ELSE CAST(strftime('%Y', full_date) AS INTEGER)
+    END AS fiscal_year,
+    ((CAST(strftime('%m', date(full_date, '-6 months')) AS INTEGER) - 1) / 3) + 1 AS fiscal_quarter,
+    BATCH_ID()
 FROM (
-    SELECT open_date AS full_date FROM stg_stores WHERE open_date IS NOT NULL
-    UNION SELECT join_date FROM stg_customers WHERE join_date IS NOT NULL
-    UNION SELECT start_date FROM stg_promotions WHERE start_date IS NOT NULL
-    UNION SELECT end_date FROM stg_promotions WHERE end_date IS NOT NULL
-    UNION SELECT transaction_date FROM stg_sales WHERE transaction_date IS NOT NULL
-    UNION SELECT order_date FROM stg_online_orders WHERE order_date IS NOT NULL
-    UNION SELECT snapshot_date FROM stg_inventory WHERE snapshot_date IS NOT NULL
-    UNION SELECT promised_delivery_date FROM stg_delivery WHERE promised_delivery_date IS NOT NULL
-    UNION SELECT actual_delivery_date FROM stg_delivery WHERE actual_delivery_date IS NOT NULL
-    UNION SELECT purchase_order_date FROM stg_procurement WHERE purchase_order_date IS NOT NULL
-    UNION SELECT expected_receipt_date FROM stg_procurement WHERE expected_receipt_date IS NOT NULL
-    UNION SELECT actual_receipt_date FROM stg_procurement WHERE actual_receipt_date IS NOT NULL
+    SELECT open_date AS full_date FROM trf_stores WHERE open_date IS NOT NULL
+    UNION SELECT join_date FROM trf_customers WHERE join_date IS NOT NULL
+    UNION SELECT start_date FROM trf_promotions WHERE start_date IS NOT NULL
+    UNION SELECT end_date FROM trf_promotions WHERE end_date IS NOT NULL
+    UNION SELECT transaction_date FROM trf_sales WHERE transaction_date IS NOT NULL
+    UNION SELECT order_date FROM trf_online_orders WHERE order_date IS NOT NULL
+    UNION SELECT snapshot_date FROM trf_inventory WHERE snapshot_date IS NOT NULL
+    UNION SELECT promised_delivery_date FROM trf_delivery WHERE promised_delivery_date IS NOT NULL
+    UNION SELECT actual_delivery_date FROM trf_delivery WHERE actual_delivery_date IS NOT NULL
+    UNION SELECT purchase_order_date FROM trf_procurement WHERE purchase_order_date IS NOT NULL
+    UNION SELECT expected_receipt_date FROM trf_procurement WHERE expected_receipt_date IS NOT NULL
+    UNION SELECT actual_receipt_date FROM trf_procurement WHERE actual_receipt_date IS NOT NULL
+)
+WHERE full_date IS NOT NULL;
+
+UPDATE dim_store
+SET is_current = 0,
+    effective_end_date_key = CAST(strftime('%Y%m%d', 'now') AS INTEGER)
+WHERE is_current = 1
+  AND store_id <> 'UNKNOWN'
+  AND EXISTS (
+      SELECT 1
+      FROM trf_stores s
+      WHERE s.store_id = dim_store.store_id
+        AND (
+            COALESCE(s.store_name, '') <> COALESCE(dim_store.store_name, '') OR
+            COALESCE(s.store_type, '') <> COALESCE(dim_store.store_type, '') OR
+            COALESCE(s.city, '') <> COALESCE(dim_store.city, '') OR
+            COALESCE(s.state, '') <> COALESCE(dim_store.state, '') OR
+            COALESCE(s.region, '') <> COALESCE(dim_store.region, '') OR
+            COALESCE(s.store_area_sqm, -1) <> COALESCE(dim_store.store_area_sqm, -1) OR
+            COALESCE(s.staff_count, -1) <> COALESCE(dim_store.staff_count, -1)
+        )
+  );
+
+INSERT INTO dim_store (
+    store_id, store_name, store_type, city, state, region, store_area_sqm, staff_count,
+    open_date_key, effective_start_date_key, effective_end_date_key, is_current, load_batch_id
+)
+SELECT store_id, store_name, store_type, city, state, region, store_area_sqm, staff_count,
+       open_date_key, CAST(strftime('%Y%m%d', 'now') AS INTEGER), NULL, 1, load_batch_id
+FROM trf_stores s
+WHERE NOT EXISTS (
+    SELECT 1 FROM dim_store d WHERE d.store_id = s.store_id AND d.is_current = 1
 );
 
-INSERT INTO dim_store (store_id, store_name, store_type, city, state, region, store_area_sqm, staff_count, open_date_key)
-SELECT store_id, store_name, store_type, city, state, region, store_area_sqm, staff_count, DATE_KEY(open_date)
-FROM stg_stores WHERE is_valid = 1;
+UPDATE dim_product
+SET is_current = 0,
+    effective_end_date_key = CAST(strftime('%Y%m%d', 'now') AS INTEGER)
+WHERE is_current = 1
+  AND product_id <> 'UNKNOWN'
+  AND EXISTS (
+      SELECT 1
+      FROM trf_products p
+      WHERE p.product_id = dim_product.product_id
+        AND (
+            COALESCE(p.product_name, '') <> COALESCE(dim_product.product_name, '') OR
+            COALESCE(p.brand, '') <> COALESCE(dim_product.brand, '') OR
+            COALESCE(p.category, '') <> COALESCE(dim_product.category, '') OR
+            COALESCE(p.subcategory, '') <> COALESCE(dim_product.subcategory, '') OR
+            COALESCE(p.unit_price, -1) <> COALESCE(dim_product.unit_price, -1) OR
+            COALESCE(p.unit_cost, -1) <> COALESCE(dim_product.unit_cost, -1) OR
+            COALESCE(p.is_active, -1) <> COALESCE(dim_product.is_active, -1)
+        )
+  );
 
-INSERT INTO dim_product (product_id, product_name, brand, category, subcategory, unit_price, unit_cost, is_active)
-SELECT product_id, product_name, brand, category, subcategory, unit_price, unit_cost, is_active
-FROM stg_products WHERE is_valid = 1;
+INSERT INTO dim_product (
+    product_id, product_name, brand, category, subcategory, unit_price, unit_cost, is_active,
+    effective_start_date_key, effective_end_date_key, is_current, load_batch_id
+)
+SELECT product_id, product_name, brand, category, subcategory, unit_price, unit_cost, is_active,
+       CAST(strftime('%Y%m%d', 'now') AS INTEGER), NULL, 1, load_batch_id
+FROM trf_products p
+WHERE NOT EXISTS (
+    SELECT 1 FROM dim_product d WHERE d.product_id = p.product_id AND d.is_current = 1
+);
 
-INSERT INTO dim_customer (customer_id, gender, birth_year, age_group, membership_type, city, email, join_date_key)
-SELECT customer_id, gender, birth_year, age_group, membership_type, city, email, DATE_KEY(join_date)
-FROM stg_customers WHERE is_valid = 1;
+UPDATE dim_customer
+SET is_current = 0,
+    effective_end_date_key = CAST(strftime('%Y%m%d', 'now') AS INTEGER)
+WHERE is_current = 1
+  AND customer_id <> 'UNKNOWN'
+  AND EXISTS (
+      SELECT 1
+      FROM trf_customers c
+      WHERE c.customer_id = dim_customer.customer_id
+        AND (
+            COALESCE(c.gender, '') <> COALESCE(dim_customer.gender, '') OR
+            COALESCE(c.birth_year, -1) <> COALESCE(dim_customer.birth_year, -1) OR
+            COALESCE(c.age_group, '') <> COALESCE(dim_customer.age_group, '') OR
+            COALESCE(c.membership_type, '') <> COALESCE(dim_customer.membership_type, '') OR
+            COALESCE(c.city, '') <> COALESCE(dim_customer.city, '') OR
+            COALESCE(c.email, '') <> COALESCE(dim_customer.email, '')
+        )
+  );
 
-INSERT INTO dim_promotion (promotion_id, promotion_name, promotion_type, discount_rate, start_date_key, end_date_key)
-SELECT promotion_id, promotion_name, promotion_type, discount_rate, DATE_KEY(start_date), DATE_KEY(end_date)
-FROM stg_promotions WHERE is_valid = 1;
+INSERT INTO dim_customer (
+    customer_id, gender, birth_year, age_group, membership_type, city, email, join_date_key,
+    effective_start_date_key, effective_end_date_key, is_current, load_batch_id
+)
+SELECT customer_id, gender, birth_year, age_group, membership_type, city, email, join_date_key,
+       CAST(strftime('%Y%m%d', 'now') AS INTEGER), NULL, 1, load_batch_id
+FROM trf_customers c
+WHERE NOT EXISTS (
+    SELECT 1 FROM dim_customer d WHERE d.customer_id = c.customer_id AND d.is_current = 1
+);
 
-INSERT INTO dim_payment_method (payment_method_id, payment_type, provider, is_online_supported)
-SELECT payment_method_id, payment_type, provider, is_online_supported
-FROM stg_payment_methods WHERE is_valid = 1;
+INSERT INTO dim_promotion (promotion_id, promotion_name, promotion_type, discount_rate, start_date_key, end_date_key, load_batch_id)
+SELECT promotion_id, promotion_name, promotion_type, discount_rate, start_date_key, end_date_key, load_batch_id
+FROM trf_promotions p
+WHERE NOT EXISTS (
+    SELECT 1 FROM dim_promotion d WHERE d.promotion_id = p.promotion_id
+);
 
-INSERT INTO dim_channel (channel_id, channel_name, channel_group, description)
-SELECT channel_id, channel_name, channel_group, description
-FROM stg_channels WHERE is_valid = 1;
+INSERT INTO dim_payment_method (payment_method_id, payment_type, provider, is_online_supported, load_batch_id)
+SELECT payment_method_id, payment_type, provider, is_online_supported, load_batch_id
+FROM trf_payment_methods p
+WHERE NOT EXISTS (
+    SELECT 1 FROM dim_payment_method d WHERE d.payment_method_id = p.payment_method_id
+);
 
-INSERT INTO dim_supplier (supplier_id, supplier_name, supplier_type, city, state, lead_time_days)
-SELECT supplier_id, supplier_name, supplier_type, city, state, lead_time_days
-FROM stg_suppliers WHERE is_valid = 1;
+INSERT INTO dim_channel (channel_id, channel_name, channel_group, description, load_batch_id)
+SELECT channel_id, channel_name, channel_group, description, load_batch_id
+FROM trf_channels c
+WHERE NOT EXISTS (
+    SELECT 1 FROM dim_channel d WHERE d.channel_id = c.channel_id
+);
 
-INSERT INTO dim_fulfilment_center (fulfilment_center_id, fulfilment_center_name, city, state, capacity_orders_per_day)
-SELECT fulfilment_center_id, fulfilment_center_name, city, state, capacity_orders_per_day
-FROM stg_fulfilment_centers WHERE is_valid = 1;
+UPDATE dim_supplier
+SET is_current = 0,
+    effective_end_date_key = CAST(strftime('%Y%m%d', 'now') AS INTEGER)
+WHERE is_current = 1
+  AND supplier_id <> 'UNKNOWN'
+  AND EXISTS (
+      SELECT 1
+      FROM trf_suppliers s
+      WHERE s.supplier_id = dim_supplier.supplier_id
+        AND (
+            COALESCE(s.supplier_name, '') <> COALESCE(dim_supplier.supplier_name, '') OR
+            COALESCE(s.supplier_type, '') <> COALESCE(dim_supplier.supplier_type, '') OR
+            COALESCE(s.city, '') <> COALESCE(dim_supplier.city, '') OR
+            COALESCE(s.state, '') <> COALESCE(dim_supplier.state, '') OR
+            COALESCE(s.lead_time_days, -1) <> COALESCE(dim_supplier.lead_time_days, -1)
+        )
+  );
 
-INSERT INTO dim_distribution_center (distribution_center_id, distribution_center_name, city, state, warehouse_area_sqm)
-SELECT distribution_center_id, distribution_center_name, city, state, warehouse_area_sqm
-FROM stg_distribution_centers WHERE is_valid = 1;
+INSERT INTO dim_supplier (
+    supplier_id, supplier_name, supplier_type, city, state, lead_time_days,
+    effective_start_date_key, effective_end_date_key, is_current, load_batch_id
+)
+SELECT supplier_id, supplier_name, supplier_type, city, state, lead_time_days,
+       CAST(strftime('%Y%m%d', 'now') AS INTEGER), NULL, 1, load_batch_id
+FROM trf_suppliers s
+WHERE NOT EXISTS (
+    SELECT 1 FROM dim_supplier d WHERE d.supplier_id = s.supplier_id AND d.is_current = 1
+);
+
+INSERT INTO dim_fulfilment_center (fulfilment_center_id, fulfilment_center_name, city, state, capacity_orders_per_day, load_batch_id)
+SELECT fulfilment_center_id, fulfilment_center_name, city, state, capacity_orders_per_day, load_batch_id
+FROM trf_fulfilment_centers f
+WHERE NOT EXISTS (
+    SELECT 1 FROM dim_fulfilment_center d WHERE d.fulfilment_center_id = f.fulfilment_center_id
+);
+
+INSERT INTO dim_distribution_center (distribution_center_id, distribution_center_name, city, state, warehouse_area_sqm, load_batch_id)
+SELECT distribution_center_id, distribution_center_name, city, state, warehouse_area_sqm, load_batch_id
+FROM trf_distribution_centers d
+WHERE NOT EXISTS (
+    SELECT 1 FROM dim_distribution_center x WHERE x.distribution_center_id = d.distribution_center_id
+);
 
 INSERT INTO etl_audit_log (batch_id, process_name, source_table, target_table, rows_extracted, rows_loaded, rows_rejected, status)
-SELECT 'BATCH_001', 'load_dim_store', 'raw_stores', 'dim_store', (SELECT COUNT(*) FROM stg_stores), (SELECT COUNT(*) FROM dim_store), (SELECT COUNT(*) FROM stg_stores WHERE is_valid = 0), 'SUCCESS';
+SELECT BATCH_ID(), 'load_dim_store', 'trf_stores', 'dim_store',
+       (SELECT COUNT(*) FROM trf_stores),
+       (SELECT COUNT(*) FROM dim_store WHERE load_batch_id = BATCH_ID()),
+       0, 'SUCCESS';
+
 INSERT INTO etl_audit_log (batch_id, process_name, source_table, target_table, rows_extracted, rows_loaded, rows_rejected, status)
-SELECT 'BATCH_001', 'load_dim_product', 'raw_products', 'dim_product', (SELECT COUNT(*) FROM stg_products), (SELECT COUNT(*) FROM dim_product), (SELECT COUNT(*) FROM stg_products WHERE is_valid = 0), 'SUCCESS';
+SELECT BATCH_ID(), 'load_dim_product', 'trf_products', 'dim_product',
+       (SELECT COUNT(*) FROM trf_products),
+       (SELECT COUNT(*) FROM dim_product WHERE load_batch_id = BATCH_ID()),
+       0, 'SUCCESS';
+
 INSERT INTO etl_audit_log (batch_id, process_name, source_table, target_table, rows_extracted, rows_loaded, rows_rejected, status)
-SELECT 'BATCH_001', 'load_dim_customer', 'raw_customers', 'dim_customer', (SELECT COUNT(*) FROM stg_customers), (SELECT COUNT(*) FROM dim_customer), (SELECT COUNT(*) FROM stg_customers WHERE is_valid = 0), 'SUCCESS';
+SELECT BATCH_ID(), 'load_dim_customer', 'trf_customers', 'dim_customer',
+       (SELECT COUNT(*) FROM trf_customers),
+       (SELECT COUNT(*) FROM dim_customer WHERE load_batch_id = BATCH_ID()),
+       0, 'SUCCESS';
+
 INSERT INTO etl_audit_log (batch_id, process_name, source_table, target_table, rows_extracted, rows_loaded, rows_rejected, status)
-SELECT 'BATCH_001', 'load_dimensions_supporting', NULL, 'supporting_dimensions', 300,
-       (SELECT COUNT(*) FROM dim_promotion) + (SELECT COUNT(*) FROM dim_payment_method) + (SELECT COUNT(*) FROM dim_channel) + (SELECT COUNT(*) FROM dim_supplier) + (SELECT COUNT(*) FROM dim_fulfilment_center) + (SELECT COUNT(*) FROM dim_distribution_center),
-       (SELECT COUNT(*) FROM stg_promotions WHERE is_valid = 0) + (SELECT COUNT(*) FROM stg_payment_methods WHERE is_valid = 0) + (SELECT COUNT(*) FROM stg_channels WHERE is_valid = 0) + (SELECT COUNT(*) FROM stg_suppliers WHERE is_valid = 0) + (SELECT COUNT(*) FROM stg_fulfilment_centers WHERE is_valid = 0) + (SELECT COUNT(*) FROM stg_distribution_centers WHERE is_valid = 0),
-       'SUCCESS';
+SELECT BATCH_ID(), 'load_supporting_dimensions', 'trf_supporting', 'supporting_dimensions',
+       (SELECT COUNT(*) FROM trf_promotions) + (SELECT COUNT(*) FROM trf_payment_methods) +
+       (SELECT COUNT(*) FROM trf_channels) + (SELECT COUNT(*) FROM trf_suppliers) +
+       (SELECT COUNT(*) FROM trf_fulfilment_centers) + (SELECT COUNT(*) FROM trf_distribution_centers),
+       (SELECT COUNT(*) FROM dim_promotion WHERE load_batch_id = BATCH_ID()) +
+       (SELECT COUNT(*) FROM dim_payment_method WHERE load_batch_id = BATCH_ID()) +
+       (SELECT COUNT(*) FROM dim_channel WHERE load_batch_id = BATCH_ID()) +
+       (SELECT COUNT(*) FROM dim_supplier WHERE load_batch_id = BATCH_ID()) +
+       (SELECT COUNT(*) FROM dim_fulfilment_center WHERE load_batch_id = BATCH_ID()) +
+       (SELECT COUNT(*) FROM dim_distribution_center WHERE load_batch_id = BATCH_ID()),
+       0, 'SUCCESS';

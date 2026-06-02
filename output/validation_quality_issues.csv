@@ -1,0 +1,7 @@
+﻿layer_name,issue_code,severity,issue_count
+lookup,LOOKUP_NOT_FOUND,WARNING,84
+staging,MISSING_REQUIRED_KEY,ERROR,68
+staging,INVALID_MEASURE,ERROR,63
+staging,INVALID_DATE,ERROR,21
+staging,DUPLICATE_BUSINESS_KEY,ERROR,5
+staging,STAGING_REJECT,ERROR,1

@@ -1,0 +1,16 @@
+﻿table_name,row_count
+dim_date,297
+dim_store,50
+dim_product,38
+dim_customer,45
+dim_promotion,34
+dim_payment_method,48
+dim_channel,45
+dim_supplier,40
+dim_fulfilment_center,45
+dim_distribution_center,46
+fact_sales,39
+fact_online_orders,38
+fact_inventory_daily,30
+fact_delivery_performance,6
+fact_procurement,34

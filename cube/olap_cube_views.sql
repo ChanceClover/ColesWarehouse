@@ -14,8 +14,14 @@ SELECT
     dd.full_date,
     dd.year,
     dd.quarter,
+    dd.quarter_name,
     dd.month,
     dd.month_name,
+    dd.year_month,
+    dd.week_number,
+    dd.is_weekend,
+    dd.fiscal_year,
+    dd.fiscal_quarter,
     ds.store_id,
     ds.store_name,
     ds.store_type,
@@ -41,6 +47,8 @@ SELECT
     fs.net_sales,
     fs.sales_cost,
     fs.gross_profit,
+    fs.gross_margin_pct,
+    fs.discount_pct,
     fs.currency
 FROM fact_sales fs
 JOIN dim_date dd ON dd.date_key = fs.date_key
@@ -58,8 +66,12 @@ SELECT
     dd.full_date,
     dd.year,
     dd.quarter,
+    dd.quarter_name,
     dd.month,
     dd.month_name,
+    dd.year_month,
+    dd.week_number,
+    dd.is_weekend,
     dc.customer_id,
     dc.gender,
     dc.age_group,
@@ -73,6 +85,7 @@ SELECT
     foo.item_count,
     foo.order_value,
     foo.delivery_fee,
+    foo.total_order_value,
     foo.order_status,
     foo.fulfilled_flag
 FROM fact_online_orders foo
@@ -88,8 +101,11 @@ SELECT
     dd.full_date,
     dd.year,
     dd.quarter,
+    dd.quarter_name,
     dd.month,
     dd.month_name,
+    dd.year_month,
+    dd.week_number,
     ds.store_id,
     ds.store_name,
     ds.city AS store_city,
@@ -105,7 +121,9 @@ SELECT
     fid.stock_loss,
     fid.closing_stock,
     fid.calculated_closing_stock,
-    fid.stock_variance
+    fid.stock_variance,
+    fid.stock_variance_abs,
+    fid.shrinkage_rate
 FROM fact_inventory_daily fid
 JOIN dim_date dd ON dd.date_key = fid.snapshot_date_key
 JOIN dim_store ds ON ds.store_key = fid.store_key
@@ -120,12 +138,15 @@ SELECT
     actual.full_date AS actual_delivery_date,
     actual.year,
     actual.quarter,
+    actual.quarter_name,
     actual.month,
     actual.month_name,
+    actual.year_month,
     fdp.delivery_partner,
     fdp.delivery_status,
     fdp.delivery_time_minutes,
     fdp.delay_minutes,
+    fdp.delay_hours,
     fdp.on_time_flag,
     fdp.order_accuracy_flag,
     dch.channel_name,
@@ -145,8 +166,10 @@ SELECT
     dd.full_date AS purchase_order_date,
     dd.year,
     dd.quarter,
+    dd.quarter_name,
     dd.month,
     dd.month_name,
+    dd.year_month,
     ds.supplier_id,
     ds.supplier_name,
     ds.supplier_type,
@@ -158,8 +181,10 @@ SELECT
     dp.category,
     fp.ordered_qty,
     fp.received_qty,
+    fp.fill_rate,
     fp.purchase_amount,
     fp.late_delivery_flag,
+    fp.receipt_delay_days,
     fp.po_status
 FROM fact_procurement fp
 JOIN dim_date dd ON dd.date_key = fp.purchase_order_date_key
