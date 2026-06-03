@@ -155,6 +155,14 @@ If that does not work:
 py --version
 ```
 
+Install Python dependencies:
+
+```powershell
+pip install -r requirements.txt
+```
+
+The main ETL, validation, and HTML dashboard scripts use only Python standard-library modules. `requirements.txt` includes Pillow for the optional image evidence script in `powerbi\build_final_evidence.py`.
+
 ### Recommended
 
 Use DB Browser for SQLite to inspect the generated warehouse:

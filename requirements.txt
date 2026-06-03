@@ -1,0 +1,3 @@
+# Core pipeline scripts use only the Python standard library.
+# Pillow is needed only for powerbi/build_final_evidence.py, which creates image-based dashboard evidence.
+Pillow>=10.0.0

@@ -92,7 +92,7 @@ def build_dashboard_png(metrics, sales_region, sales_channel, issues):
     kpis = [
         ("Net Sales", fmt_money(metrics["net_sales"]), "from fact_sales"),
         ("Gross Profit", fmt_money(metrics["gross_profit"]), "sales profitability"),
-        ("Gross Margin", fmt_pct(metrics["gross_margin_pct"]), "average margin"),
+        ("Gross Margin", fmt_pct(metrics["gross_margin_pct"]), "weighted margin"),
         ("Online Orders", fmt_money(metrics["online_order_value"]), "total order value"),
         ("On-time Delivery", fmt_pct(metrics["on_time_pct"]), "delivery performance"),
         ("DQ Issues", str(metrics["dq_issues"]), "logged and traceable"),
@@ -179,7 +179,7 @@ def build_dashboard_html(metrics, sales_region, sales_channel, issues):
     <section class="kpis">
       <div class="card"><div class="kpi-label">Net Sales</div><div class="kpi-value">{fmt_money(metrics["net_sales"])}</div><div class="kpi-sub">from fact_sales</div></div>
       <div class="card"><div class="kpi-label">Gross Profit</div><div class="kpi-value">{fmt_money(metrics["gross_profit"])}</div><div class="kpi-sub">sales profitability</div></div>
-      <div class="card"><div class="kpi-label">Gross Margin</div><div class="kpi-value">{fmt_pct(metrics["gross_margin_pct"])}</div><div class="kpi-sub">average margin</div></div>
+      <div class="card"><div class="kpi-label">Gross Margin</div><div class="kpi-value">{fmt_pct(metrics["gross_margin_pct"])}</div><div class="kpi-sub">weighted margin</div></div>
       <div class="card"><div class="kpi-label">Online Orders</div><div class="kpi-value">{fmt_money(metrics["online_order_value"])}</div><div class="kpi-sub">total order value</div></div>
       <div class="card"><div class="kpi-label">On-time Delivery</div><div class="kpi-value">{fmt_pct(metrics["on_time_pct"])}</div><div class="kpi-sub">delivery performance</div></div>
       <div class="card"><div class="kpi-label">Data Quality Issues</div><div class="kpi-value">{metrics["dq_issues"]}</div><div class="kpi-sub">logged and traceable</div></div>
@@ -317,7 +317,7 @@ def main():
             """
             SELECT ROUND(SUM(net_sales), 2),
                    ROUND(SUM(gross_profit), 2),
-                   ROUND(AVG(gross_margin_pct) * 100, 2)
+                   ROUND(SUM(gross_profit) / NULLIF(SUM(net_sales), 0) * 100, 2)
             FROM fact_sales
             """,
         )

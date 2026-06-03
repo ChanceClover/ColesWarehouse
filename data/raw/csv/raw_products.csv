@@ -1,51 +1,51 @@
 product_id,product_name,brand,category,subcategory,unit_price,unit_cost,is_active
-prd0001,BakerLane Bread 1,CafeGold,Bakery,Bread,7.81,,0
-,BakerLane Frozen Meal 2,AussieFarm,Frozen,Frozen Meal,35.72,43.62,FALSE
-PRD0003,FreshCo Chicken 3,HomeBasics,Meat & Seafood,Chicken,44.68,14.5,0
-PRD0004,Coles Cheese 4,GreenLeaf,Dairy,Cheese,50.59,9.56,
-PRD0005,CafeGold Pastry 5,DailyDairy,Misc,,10.72,22.68,1
-PRD0006,CafeGold Ice Cream 6,GreenLeaf,Frozen,Ice Cream,69.33,35.66,TRUE
-PRD0007,Coles Fish 7,BakerLane,Meat & Seafood,Fish,61.39,42.01,No
-PRD0008,UNKNOWN,CafeGold,Pantry,Canned Food,40.38,,0
- PRD0009 ,Coles Cheese 9,,Dairy,Cheese,68.36,38.74,TRUE
-PRD0010,CafeGold Fish 10,Coles,Meat & Seafood,Fish,8.59,34.34,N
-PRD0011,,BakerLane,Household,Cleaning,63.71,4.01,TRUE
-PRD0012,AussieFarm Pasta 12,BakerLane,Misc,Pasta,13.9,15.88,1
-PRD0013,BakerLane Coffee 13,,Beverages,Coffee,24.68,29.79,1
-PRD0014,Coles Salad 14,CafeGold,Fresh Produce,Salad,16.43,34.12,Yes
-PRD0015,BakerLane Yoghurt 15,Coles,dairy,Yoghurt,17.26,39.5,0
-PRD0016,CafeGold Frozen Meal 16,BakerLane,Frozen,,58.35,43.54,
-PRD0017,Coles Beef 17,FreshCo,Meat & Seafood,Beef,51.63,30.53,FALSE
-PRD0018,GreenLeaf Salad 18,DailyDairy,Fresh Produce,Salad,10.66,-5,1
-,OceanBest Cleaning 19,GreenLeaf,Household,Cleaning,66.94,42.29,1
-PRD0020,CafeGold Salad 20,homebasics,Fresh Produce,Salad,6.25,43.59,FALSE
-PRD0020,,DailyDairy,Dairy,Yoghurt,47.53,10.87,Yes
-PRD0022,AussieFarm Vegetables 22,GreenLeaf,,Vegetables,63.39,1.2,1
-PRD0023,,CafeGold,Fresh Produce,fruit,49.79,40.94,
-PRD0024,,OceanBest,Frozen,Ice Cream,-10,7.1,Yes
-PRD0025,GreenLeaf Frozen Veg 25,OceanBest,Frozen,Frozen Veg,10.48,39.56,
-PRD0026,DailyDairy Pasta 26,CafeGold,Misc,Pasta,76.36,21.6,N
-PRD0027,HomeBasics Milk 27,GreenLeaf,Dairy,Milk,29.26,33.89,Y
-PRD0028,FreshCo Frozen Veg 28,DailyDairy,Frozen,frozen veg,61.36,36.42,
-PRD0029,,BakerLane,Fresh Produce,Salad,6.96,43.75,N
-PRD0030,HomeBasics Pasta 30,BakerLane,Pantry,,60.72,-5,1
-PRD0031,CafeGold Pet Care 31,,Misc,Pet Care,18.81,2.94,No
-PRD0032,BakerLane Frozen Meal 32,FreshCo,Frozen,Frozen Meal,19.56,30.23,0
-PRD0033,Coles Cheese 33,CafeGold,Dairy,Cheese,34.29,1.43,0
-PRD0034,,DailyDairy,Bakery,Cake,28.15,7.98,
-PRD0035,HomeBasics Yoghurt 35,,Dairy,Yoghurt,52.96,34.89,FALSE
-PRD0036,CafeGold Pet Care 36,HomeBasics,Misc,Pet Care,47.93,3.8,FALSE
-prd0037,FreshCo Cleaning 37,FreshCo,Household,Cleaning,4.72,25.94,No
-PRD0038,AussieFarm Fish 38,CafeGold,Meat & Seafood,Fish,52.22,,FALSE
-PRD0039,AussieFarm Pet Care 39,BakerLane,Household,Pet Care,52.31,-5,
-PRD0040,AussieFarm Soft Drink 40,AussieFarm,Beverages,Soft Drink,57.14,25.37,0
-PRD0041,UNKNOWN,OceanBest,Bakery,Cake,75.89,10.58,Yes
-PRD0042,FreshCo Bread 42,,Bakery,Bread,13.61,31.33,Yes
-PRD0043,DailyDairy Cleaning 43,BakerLane,Household,Cleaning,72.46,30.68,FALSE
-PRD0044,GreenLeaf Paper Goods 44,AussieFarm,Household,Paper Goods,70.12,5.07,
-,BakerLane Cheese 45,GreenLeaf,,Cheese,74.54,18.14,0
-PRD0046,HomeBasics Pasta 46,HomeBasics,Pantry,Pasta,24.02,31.48,Yes
-PRD0047,,AussieFarm,Household,Paper Goods,20.15,11.11,FALSE
-PRD0048,CafeGold Milk 48,Coles,Dairy,Milk,,19.04,N
-PRD0049,GreenLeaf Beef 49,,Misc,Beef,2.78,15.84,N
-prd0050,AussieFarm Beef 50,CafeGold,Meat & Seafood,,,-5,Y
+prd0001,Helga's Traditional Wholemeal Bread,Helga's,Bakery,Bread,7.81,4.60,0
+PRD0019,McCain Family Pizza Supreme,McCain,Frozen,Frozen Meal,35.72,18.90,FALSE
+PRD0003,Steggles Chicken Breast Fillets,Steggles,Meat & Seafood,Chicken,44.68,14.5,0
+PRD0004,Bega Tasty Cheese Block,Bega,Dairy,Cheese,50.59,9.56,
+PRD0005,Coles Bakery Butter Croissants,Coles Bakery,Bakery,Pastry,10.72,22.68,1
+PRD0006,Connoisseur Vanilla Ice Cream,Connoisseur,Frozen,Ice Cream,69.33,35.66,TRUE
+PRD0007,Tassal Atlantic Salmon Portions,Tassal,Meat & Seafood,Fish,61.39,42.01,No
+PRD0008,Heinz Baked Beans Cans,Heinz,Pantry,Canned Food,40.38,,0
+ PRD0009 ,Mainland Vintage Cheddar Cheese,Mainland,Dairy,Cheese,68.36,38.74,TRUE
+PRD0010,John West Tuna Slices,John West,Meat & Seafood,Fish,8.59,34.34,N
+PRD0011,Finish Powerball Dishwasher Tablets,Finish,Household,Cleaning,63.71,4.01,TRUE
+PRD0012,San Remo Penne Pasta,San Remo,Pantry,Pasta,13.9,15.88,1
+PRD0013,Moccona Classic Instant Coffee,Moccona,Beverages,Coffee,24.68,29.79,1
+PRD0014,Coles Kitchen Garden Salad Bowl,Coles Kitchen,Fresh Produce,Salad,16.43,34.12,Yes
+PRD0015,Chobani Greek Yoghurt Vanilla,Chobani,dairy,Yoghurt,17.26,39.5,0
+PRD0016,Birds Eye SteamFresh Vegetable Medley,Birds Eye,Frozen,Frozen Veg,58.35,43.54,
+PRD0017,Coles Australian Beef Mince,Coles,Meat & Seafood,Beef,51.63,30.53,FALSE
+PRD0018,Perfection Fresh Caesar Salad Kit,Perfection Fresh,Fresh Produce,Salad,10.66,-5,1
+PRD0021,Morning Fresh Dishwashing Liquid,Morning Fresh,Household,Cleaning,66.94,42.29,1
+PRD0020,Coles Australian Baby Spinach,Coles,Fresh Produce,Salad,6.25,43.59,FALSE
+PRD0020,Dairy Farmers Thick & Creamy Yoghurt,Dairy Farmers,Dairy,Yoghurt,47.53,10.87,Yes
+PRD0022,Coles Australian Carrots 1kg,Coles,Fresh Produce,Vegetables,63.39,1.2,1
+PRD0023,Fresh Produce Bananas,Coles,Fresh Produce,Fruit,49.79,40.94,
+PRD0024,Bulla Creamy Classics Vanilla Ice Cream,Bulla,Frozen,Ice Cream,42.50,18.75,Yes
+PRD0025,Birds Eye Frozen Peas,Birds Eye,Frozen,Frozen Veg,10.48,39.56,
+PRD0026,Barilla Spaghetti No.5,Barilla,Pantry,Pasta,76.36,21.6,N
+PRD0027,Dairy Farmers Full Cream Milk,Dairy Farmers,Dairy,Milk,29.26,33.89,Y
+PRD0028,McCain Mixed Vegetables,McCain,Frozen,Frozen Veg,61.36,36.42,
+PRD0029,Coles Kitchen Greek Salad,Coles Kitchen,Fresh Produce,Salad,6.96,43.75,N
+PRD0030,Vetta High Fibre Pasta,Vetta,Pantry,Pasta,60.72,34.10,1
+PRD0031,Whiskas Adult Cat Food Chicken,Whiskas,Household,Pet Care,18.81,2.94,No
+PRD0032,On The Menu Roast Chicken Meal,On The Menu,Frozen,Frozen Meal,19.56,30.23,0
+PRD0033,Devondale Shredded Mozzarella,Devondale,Dairy,Cheese,34.29,1.43,0
+PRD0034,Coles Bakery Chocolate Mud Cake,Coles Bakery,Bakery,Cake,28.15,7.98,
+PRD0035,Yoplait Strawberry Yoghurt,Yoplait,Dairy,Yoghurt,52.96,34.89,FALSE
+PRD0036,Pedigree Adult Dog Food Beef,Pedigree,Household,Pet Care,47.93,3.8,FALSE
+prd0037,White King Bathroom Cleaner,White King,Household,Cleaning,4.72,25.94,No
+PRD0038,Sealord Hoki Fish Fillets,Sealord,Meat & Seafood,Fish,52.22,28.50,FALSE
+PRD0039,My Dog Gourmet Beef Dog Food,My Dog,Household,Pet Care,52.31,-5,
+PRD0040,Coca-Cola Classic Soft Drink 1.25L,Coca-Cola,Beverages,Soft Drink,57.14,25.37,0
+PRD0041,Coles Bakery Carrot Cake,Coles Bakery,Bakery,Cake,75.89,10.58,Yes
+PRD0042,Tip Top The One White Sandwich Bread,Tip Top,Bakery,Bread,13.61,31.33,Yes
+PRD0043,Ajax Spray n Wipe Multipurpose Cleaner,Ajax,Household,Cleaning,72.46,30.68,FALSE
+PRD0044,Kleenex Toilet Tissue 12 Pack,Kleenex,Household,Paper Goods,70.12,5.07,
+PRD0045,Bega Cheese Slices,Bega,Dairy,Cheese,74.54,18.14,0
+PRD0046,Leggo's Pasta Sauce Tomato Basil,Leggo's,Pantry,Pasta,24.02,31.48,Yes
+PRD0047,Sorbent Paper Towel 2 Pack,Sorbent,Household,Paper Goods,20.15,11.11,FALSE
+PRD0048,Coles Lite Milk 2L,Coles,Dairy,Milk,,19.04,N
+PRD0049,Coles Finest Beef Scotch Fillet,Coles Finest,Meat & Seafood,Beef,2.78,15.84,N
+prd0050,Cape Grim Beef Rump Steak,Cape Grim,Meat & Seafood,Beef,74.90,43.20,Y

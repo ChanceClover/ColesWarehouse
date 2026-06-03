@@ -73,7 +73,7 @@ def main():
             """
             SELECT ROUND(SUM(net_sales), 2),
                    ROUND(SUM(gross_profit), 2),
-                   ROUND(AVG(gross_margin_pct) * 100, 2)
+                   ROUND(SUM(gross_profit) / NULLIF(SUM(net_sales), 0) * 100, 2)
             FROM fact_sales
             """,
         )
@@ -130,10 +130,16 @@ def main():
         sales_by_category = fetch_all(
             conn,
             """
-            SELECT dp.category, ROUND(SUM(fs.net_sales), 2) AS total_net_sales
+            SELECT
+                CASE
+                    WHEN fs.product_key = 0 THEN 'Unknown / Unmatched Product'
+                    WHEN dp.category = 'Unknown' THEN 'Unknown Category'
+                    ELSE dp.category
+                END AS product_category,
+                ROUND(SUM(fs.net_sales), 2) AS total_net_sales
             FROM fact_sales fs
             JOIN dim_product dp ON dp.product_key = fs.product_key
-            GROUP BY dp.category
+            GROUP BY product_category
             ORDER BY total_net_sales DESC
             LIMIT 8
             """,

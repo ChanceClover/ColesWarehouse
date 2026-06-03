@@ -3,12 +3,7 @@ __pycache__/
 *.pyc
 
 # Generated warehouse outputs
-output/*.sqlite
-output/*.db
-
-# Keep exported Power BI CSVs optional.
-# Remove the next line if your lecturer wants generated CSV files committed.
-output/powerbi/
+output/
 
 # Local Power BI temp/cache files
 *.tmp
