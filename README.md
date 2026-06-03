@@ -163,6 +163,14 @@ pip install -r requirements.txt
 
 The main ETL, validation, and HTML dashboard scripts use only Python standard-library modules. `requirements.txt` includes Pillow for the optional image evidence script in `powerbi\build_final_evidence.py`.
 
+This project also includes a Streamlit visualization app for the warehouse ETL output. After installing dependencies, run:
+
+```powershell
+streamlit run streamlit_app.py
+```
+
+The Streamlit app reads `output\coles_warehouse_dw.sqlite` and displays key metrics, sales trends, delivery performance, and data quality insights.
+
 ### Recommended
 
 Use DB Browser for SQLite to inspect the generated warehouse:
