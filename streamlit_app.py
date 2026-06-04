@@ -159,11 +159,22 @@ def main():
         min_value=min_date,
         max_value=max_date,
     )
-    if isinstance(date_range, list) and len(date_range) == 2:
+    if isinstance(date_range, (list, tuple)) and len(date_range) == 2:
         start_date, end_date = date_range
+        if start_date > end_date:
+            start_date, end_date = end_date, start_date
+    elif isinstance(date_range, (list, tuple)) and len(date_range) == 1:
+        st.sidebar.warning("Pilih tanggal akhir untuk menerapkan rentang tanggal.")
+        st.stop()
     else:
         start_date = min_date
         end_date = max_date
+
+    if start_date < min_date or end_date > max_date:
+        st.sidebar.error(
+            f"Rentang tanggal harus berada antara {min_date.isoformat()} dan {max_date.isoformat()}."
+        )
+        st.stop()
 
     regions = ["Semua"] + sorted(sales["region"].fillna("Unknown").unique().tolist())
     selected_region = st.sidebar.selectbox("Region", regions)
@@ -176,6 +187,8 @@ def main():
 
     filtered_sales = filter_sales(sales, start_date, end_date, selected_region, selected_categories, selected_channels)
     filtered_delivery = delivery[(delivery["actual_date"] >= start_date) & (delivery["actual_date"] <= end_date)]
+    if selected_channels:
+        filtered_delivery = filtered_delivery[filtered_delivery["channel_name"].isin(selected_channels)]
 
     st.title("Coles Warehouse Streamlit Dashboard")
     st.markdown(
@@ -205,13 +218,26 @@ def main():
     else 0
     )
     total_discount = filtered_sales["discount_amount"].sum()
-    order_value = load_query(db_path, "SELECT ROUND(SUM(total_order_value), 2) AS total_order_value FROM fact_online_orders").iloc[0, 0]
+    channel_placeholders = ",".join("?" for _ in selected_channels)
+    order_value = load_query(
+        db_path,
+        f"""
+        SELECT ROUND(SUM(foo.total_order_value), 2) AS total_order_value
+        FROM fact_online_orders foo
+        JOIN dim_date d ON foo.order_date_key = d.date_key
+        JOIN dim_channel dc ON foo.channel_key = dc.channel_key
+        WHERE d.full_date BETWEEN ? AND ?
+          AND dc.channel_name IN ({channel_placeholders})
+        """,
+        (str(start_date), str(end_date), *selected_channels),
+    ).iloc[0, 0]
 
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5 = st.columns(5)
     col1.metric("Net Sales", format_currency(total_net_sales))
     col2.metric("Gross Profit", format_currency(total_gross_profit))
     col3.metric("Gross Margin %", f"{gross_margin_pct:.1f}%")
-    col4.metric("Total Diskon", format_currency(total_discount))
+    col4.metric("Online Order Value", format_currency(order_value))
+    col5.metric("Total Diskon", format_currency(total_discount))
 
     st.markdown("---")
 

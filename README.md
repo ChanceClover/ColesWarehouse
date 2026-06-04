@@ -1,647 +1,1272 @@
-# Coles Data Warehouse Final Project
 
-## Overview
+# Coles Omnichannel Data Warehouse
 
-This project is a complete local data warehouse pipeline for a Coles-style retail and warehouse operation.
+  
 
-It starts from a dirty operational SQLite source database, cleans and validates the data, loads a star-schema warehouse, creates OLAP-style cube views, and exports Power BI-ready reporting files.
+## 1. Project Overview
 
-The project is designed to demonstrate:
+  
 
-- ETL pipeline design
-- staging, transform, dimension, and fact layers
-- data quality handling
-- audit and batch logging
-- unknown dimension handling
-- incremental load support
-- validation evidence
-- Power BI dashboard preparation
+This project is a local data warehouse and ETL pipeline for a Coles-style retail business. It takes dirty operational data, cleans and validates it, loads it into a star-schema warehouse, and exposes the result through Streamlit, a static HTML dashboard, validation files, cube views, and Power BI-ready exports.
 
-## Main Workflow
+  
 
-For the final project demo, run:
+The project is built with:
 
-```powershell
-python .\run_project.py
-```
+  
 
-If `python` is not recognized, try:
+- SQLite for the source database and final warehouse.
 
-```powershell
-py .\run_project.py
-```
+- SQL for schema creation, staging, transformation, dimension loading, fact loading, and validation logic.
 
-This command runs the full pipeline:
+- Python for orchestration, helper functions, validation exports, dashboard generation, and Power BI export.
+
+- Streamlit for the interactive dashboard.
+
+  
+
+## 2. Final Goal: Omnichannel Analytics
+
+  
+
+The final goal is to build a warehouse foundation for **omnichannel retail analytics**.
+
+  
+
+In this project, omnichannel means combining different retail and operational channels into one analytical model. Instead of looking at store sales, online orders, delivery, inventory, and procurement separately, the warehouse connects them through shared dimensions such as date, product, customer, store, and channel.
+
+  
+
+This allows the business to answer questions such as:
+
+  
+
+- Which regions, products, and channels generate the most sales?
+
+- How do store, online, mobile app, click-and-collect, and home delivery channels compare?
+
+- Are delivery delays affecting online order performance?
+
+- Are inventory issues connected to sales or procurement problems?
+
+- Which suppliers or product categories create operational risk?
+
+- What data-quality issues exist in the source system?
+
+  
+
+The current project is a foundation for omnichannel reporting. It already connects sales, online orders, delivery, inventory, procurement, products, customers, stores, channels, and data-quality evidence.
+
+  
+
+## 3. Data Sources
+
+  
+
+The main source database is:
+
+  
 
 ```text
-1. Build the warehouse
-2. Generate validation reports
-3. Create cube views
-4. Generate an HTML dashboard
-5. Export Power BI-ready CSV files
-```
 
-After it finishes, the main outputs are:
-
-```text
-output\coles_warehouse_dw.sqlite
-output\validation_summary.md
-output\validation_*.csv
-output\dashboard.html
-output\powerbi\
-```
-
-## Source Data
-
-The official source system for this project is the dirty operational SQLite database:
-
-```text
 data\raw\coles_dirty_source_50_records.sqlite
+
 ```
 
-The CSV files in this folder are only raw extracts for inspection:
+  
+
+The raw CSV extracts are also available for inspection:
+
+  
 
 ```text
+
 data\raw\csv\
+
 ```
 
-They are not the final product. The final product is the generated warehouse database, validation evidence, cube views, and Power BI export package.
+  
 
-## Project Flow
+The ETL uses the SQLite database as the official source system.
+
+  
+
+### Source Tables
+
+  
+
+
+| Source Table                       | Business Area                  |
+|------------------------------------|--------------------------------|
+| `raw_stores`                       | Store operations               |
+| `raw_products`                     | Product management             |
+| `raw_customers`                    | Customer and membership data   |
+| `raw_promotions`                   | Promotions and discounts       |
+| `raw_payment_methods`              | Payment method data            |
+| `raw_channels`                     | Sales and fulfilment channels  |
+| `raw_suppliers`                    | Supplier data                  |
+| `raw_fulfilment_centers`           | Online fulfilment centers      |
+| `raw_distribution_centers`         | Distribution centers           |
+| `raw_sales_transactions`           | Sales transactions             |
+| `raw_online_orders`                | Online orders                  |
+| `raw_inventory_movements`          | Inventory movement             |
+| `raw_delivery_logs`                | Delivery performance           |
+| `raw_purchase_orders`              | Procurement                    |
+  
+
+The source data intentionally includes dirty data such as inconsistent text, duplicate IDs, invalid dates, missing lookup keys, invalid measures, status typos, and mixed boolean formats.
+
+  
+
+## 4. ETL Pipeline
+
+  
+
+The pipeline flow is:
+
+  
 
 ```text
-Raw SQLite Source
-    -> Staging Tables
-    -> Transform Tables
-    -> Dimension Tables
-    -> Fact Tables
-    -> Cube Views
-    -> Power BI Export
+
+Dirty SQLite Source
+
+-> Staging Tables
+
+-> Transform Tables
+
+-> Dimension Tables
+
+-> Fact Tables
+
+-> Cube Views
+
+-> Validation and Reporting Outputs
+
 ```
 
-The Python scripts act as runners. Most warehouse logic is written in SQL.
+  
 
-## Folder Structure
+### 4.1 Extract
+
+  
+
+The ETL starts by attaching the raw SQLite source database and reading the `raw_*` tables.
+
+  
+
+`run_etl.py` also registers helper functions into SQLite so the SQL scripts can clean data consistently:
+
+  
+
+
+| Helper Function | Purpose                                                                       |
+|-----------------|-------------------------------------------------------------------------------|
+| `CLEAN_TEXT()`  | Trims text and treats blank strings as missing.                               |
+| `CLEAN_ID()`    | Trims and uppercases business keys.                                           |
+| `PARSE_DATE()`  | Converts multiple date formats into a standard date.                          |
+| `DATE_KEY()`    | Converts dates into integer keys like `20250104`.                             |
+| `NUM()`         | Converts text into numeric values.                                            |
+| `INT_NUM()`     | Converts text into integers.                                                  |
+| `CLEAN_BOOL()`  | Converts values like `yes`, `no`, `1`, `0`, `true`, and `false`.              |
+
+  
+
+This step prepares the source data so SQL can handle dirty values in a controlled way.
+
+  
+
+### 4.2 Staging Layer
+
+  
+
+The staging layer creates `stg_*` tables from the raw source tables.
+
+  
+
+This layer performs first-pass cleaning and validation:
+
+  
+
+- Standardizes IDs, text, dates, numbers, and boolean values.
+
+- Detects duplicate business keys.
+
+- Checks missing required IDs.
+
+- Rejects invalid dates.
+
+- Rejects invalid or negative business measures.
+
+- Adds `is_valid` to mark whether a row can continue.
+
+- Adds `error_reason` to explain why a row failed.
+
+  
+
+Example staging tables:
+
+  
 
 ```text
-ProjectColesWarehouse\
-|
-|-- run_project.py
-|-- run_etl.py
-|-- run_validation.py
-|-- run_dashboard.py
-|-- README.md
-|
-|-- data\
-|   |-- raw\
-|       |-- coles_dirty_source_50_records.sqlite
-|       |-- csv\
-|
-|-- sql\
-|   |-- 01_schema.sql
-|   |-- 02_staging.sql
-|   |-- 03_transform.sql
-|   |-- 03_load_dimensions.sql
-|   |-- 04_load_facts.sql
-|   |-- 05_validation.sql
-|
-|-- cube\
-|   |-- run_cube.py
-|   |-- olap_cube_views.sql
-|   |-- README.md
-|
-|-- powerbi\
-|   |-- export_powerbi.py
-|   |-- model_relationships.md
-|   |-- dax_measures.md
-|   |-- dashboard_blueprint.md
-|   |-- final_dashboard_layout.md
-|
-|-- output\
-    |-- coles_warehouse_dw.sqlite
-    |-- validation_summary.md
-    |-- validation_*.csv
-    |-- dashboard.html
-    |-- powerbi\
+
+stg_sales
+
+stg_online_orders
+
+stg_inventory
+
+stg_delivery
+
+stg_procurement
+
+stg_products
+
+stg_customers
+
+stg_stores
+
 ```
 
-The `output` folder is generated by the project scripts.
+  
 
-## Requirements
+The staging layer is important because it separates raw dirty data from data that is ready for business transformation.
 
-### Required
+  
 
-Install Python:
+### 4.3 Data-Quality Logging
+
+  
+
+Rows that fail staging validation are not ignored. They are recorded in:
+
+  
 
 ```text
-https://www.python.org/downloads/
+
+data_quality_issue
+
+etl_error_log
+
 ```
 
-During installation, enable:
+  
+
+The ETL classifies problems using issue codes such as:
+
+  
 
 ```text
-Add Python to PATH
+
+MISSING_REQUIRED_KEY
+
+DUPLICATE_BUSINESS_KEY
+
+INVALID_DATE
+
+INVALID_MEASURE
+
+STAGING_REJECT
+
+LOOKUP_NOT_FOUND
+
 ```
 
-Check Python in PowerShell:
+  
 
-```powershell
-python --version
-```
+This keeps dirty-data evidence visible for the final project. The goal is not to hide bad source data, but to show that the ETL detects and documents it.
 
-If that does not work:
+  
 
-```powershell
-py --version
-```
+### 4.4 Transform Layer
 
-Install Python dependencies:
+  
 
-```powershell
-pip install -r requirements.txt
-```
+The transform layer creates `trf_*` tables from valid staging rows.
 
-The main ETL, validation, and HTML dashboard scripts use only Python standard-library modules. `requirements.txt` includes Pillow for the optional image evidence script in `powerbi\build_final_evidence.py`.
+  
 
-This project also includes a Streamlit visualization app for the warehouse ETL output. After installing dependencies, run:
+This layer turns cleaned data into business-ready records:
 
-```powershell
-streamlit run streamlit_app.py
-```
+  
 
-The Streamlit app reads `output\coles_warehouse_dw.sqlite` and displays key metrics, sales trends, delivery performance, and data quality insights.
+- Standardizes business values using `map_standard_value`.
 
-### Recommended
+- Converts typos such as `recieved` to `received`.
 
-Use DB Browser for SQLite to inspect the generated warehouse:
+- Converts `delivred` to `delivered`.
+
+- Maps channel names such as `e-commerce` to `eCommerce`.
+
+- Fills safe descriptive defaults such as `Unknown`.
+
+- Calculates sales, inventory, delivery, and procurement measures.
+
+- Prepares records for dimension and fact loading.
+
+  
+
+Important transformation calculations include:
+
+  
 
 ```text
-https://sqlitebrowser.org/
+
+net_sales = gross_sale - discount_amount
+
+gross_profit = net_sales - sales_cost
+
+gross_margin_pct = gross_profit / net_sales
+
+discount_pct = discount_amount / gross_sale
+
+total_order_value = order_value + delivery_fee
+
+calculated_closing_stock = opening_stock + stock_in - stock_out - stock_loss
+
+stock_variance = closing_stock - calculated_closing_stock
+
+shrinkage_rate = stock_loss / (opening_stock + stock_in)
+
+delay_hours = delay_minutes / 60
+
+fill_rate = received_qty / ordered_qty
+
 ```
 
-Use Power BI Desktop to build the dashboard:
+  
+
+This layer is where the raw operational data becomes useful for analysis.
+
+  
+
+### 4.5 Dimension Loading
+
+  
+
+The dimension loading step creates the descriptive tables used by the star schema.
+
+  
+
+Dimension tables include:
+
+  
 
 ```text
-https://powerbi.microsoft.com/desktop/
-```
 
-## Running The Project
-
-Open PowerShell in the project folder:
-
-```powershell
-cd "C:\Users\Ichsan\Documents\6\Data Warehouse\ProjectColesWarehouse"
-```
-
-Run the final workflow:
-
-```powershell
-python .\run_project.py
-```
-
-If rebuild fails because the SQLite file is locked, close DB Browser for SQLite, Power BI, or any app currently using:
-
-```text
-output\coles_warehouse_dw.sqlite
-```
-
-Then run the command again.
-
-Expected result:
-
-```text
-Final project pipeline complete.
-Warehouse database: output\coles_warehouse_dw.sqlite
-Validation summary: output\validation_summary.md
-HTML dashboard: output\dashboard.html
-Power BI CSV folder: output\powerbi
-```
-
-## Optional Commands
-
-Run only the ETL rebuild:
-
-```powershell
-python .\run_etl.py
-```
-
-Run ETL in incremental mode:
-
-```powershell
-python .\run_etl.py --incremental
-```
-
-Run the full project in incremental mode:
-
-```powershell
-python .\run_project.py --incremental
-```
-
-Run only validation:
-
-```powershell
-python .\run_validation.py
-```
-
-Generate only the HTML dashboard:
-
-```powershell
-python .\run_dashboard.py
-```
-
-Create only cube views:
-
-```powershell
-python .\cube\run_cube.py
-```
-
-Export only Power BI files:
-
-```powershell
-python .\powerbi\export_powerbi.py
-```
-
-## Validation
-
-Validation is now automated.
-
-Run:
-
-```powershell
-python .\run_validation.py
-```
-
-Or simply run:
-
-```powershell
-python .\run_project.py
-```
-
-The project generates:
-
-```text
-output\validation_summary.md
-output\validation_row_counts.csv
-output\validation_transform_counts.csv
-output\validation_quality_issues.csv
-output\validation_unknown_keys.csv
-output\validation_negative_measures.csv
-output\validation_scd_status.csv
-output\validation_sales_by_region.csv
-```
-
-The validation checks:
-
-- dimension and fact row counts
-- transform-layer row counts
-- data-quality issue classifications
-- unknown surrogate-key usage
-- SCD current and historical rows
-- negative business measures
-- sales analysis by region
-- latest ETL batch status
-
-The SQL reference file still exists here:
-
-```text
-sql\05_validation.sql
-```
-
-Use it only if you want to inspect or manually run the validation SQL in DB Browser for SQLite.
-
-## Data Warehouse Layers
-
-### Raw Layer
-
-The raw layer is the attached SQLite source database.
-
-It is referenced by the ETL as:
-
-```sql
-raw.raw_stores
-raw.raw_products
-raw.raw_sales_transactions
-```
-
-The source database is not modified.
-
-### Staging Layer
-
-Staging tables use the prefix:
-
-```text
-stg_
-```
-
-This layer performs first-pass cleaning:
-
-- trims text
-- standardizes IDs
-- parses dates
-- converts numbers
-- checks required fields
-- detects invalid rows
-- records error reasons
-
-### Transform Layer
-
-Transform tables use the prefix:
-
-```text
-trf_
-```
-
-This layer prepares business-ready data:
-
-- standardizes categories and statuses
-- applies mapping rules
-- calculates derived metrics
-- classifies data-quality issues
-
-### Dimension Layer
-
-Dimension tables use the prefix:
-
-```text
-dim_
-```
-
-Examples:
-
-```text
 dim_date
+
 dim_store
+
 dim_product
+
 dim_customer
+
+dim_promotion
+
+dim_payment_method
+
+dim_channel
+
 dim_supplier
+
+dim_fulfilment_center
+
+dim_distribution_center
+
 ```
 
-Dimensions use surrogate keys, business keys, unknown members, and SCD-ready fields where relevant.
+  
 
-### Fact Layer
+The date dimension is generated from all relevant dates in the transform layer, including transaction dates, order dates, inventory dates, delivery dates, procurement dates, customer join dates, promotion dates, and store open dates.
 
-Fact tables use the prefix:
+  
+
+Some dimensions are SCD Type 2-ready:
+
+  
 
 ```text
-fact_
+
+dim_store
+
+dim_product
+
+dim_customer
+
+dim_supplier
+
 ```
 
-Examples:
+  
+
+These tables include:
+
+  
 
 ```text
-fact_sales
-fact_online_orders
-fact_inventory_daily
-fact_delivery_performance
-fact_procurement
+
+effective_start_date_key
+
+effective_end_date_key
+
+is_current
+
 ```
 
-Facts store measurable business events and join to dimensions using surrogate keys.
+  
 
-## Star Schema
+This allows the warehouse to preserve old versions of dimension records when business attributes change.
+
+  
+
+### 4.6 Unknown Members
+
+  
+
+The schema creates unknown dimension rows with surrogate key `0`.
+
+  
+
+This protects the fact tables when a lookup fails. For example, if a sales row references a product that does not exist in `dim_product`, the ETL can still load the fact row using `product_key = 0` and record a `LOOKUP_NOT_FOUND` issue.
+
+  
+
+This design keeps the fact row traceable instead of silently dropping it.
+
+  
+
+### 4.7 Fact Loading
+
+  
+
+Fact tables are loaded from transform tables by joining to the dimension tables.
+
+  
+
+
+| Fact Table                  | Grain                              | Purpose                                                                             |
+|-----------------------------|------------------------------------|-------------------------------------------------------------------------------------|
+| `fact_sales`                | One row per sales transaction      | Sales, discount, margin, customer, product, store, and channel analysis             |
+| `fact_online_orders`        | One row per online order           | Online order value, fulfilment center, order status, and channel analysis           |
+| `fact_inventory_daily`      | One row per inventory record per day | Stock movement, variance, and shrinkage analysis                                  |
+| `fact_delivery_performance` | One row per delivery event         | Delivery delay, on-time performance, and order accuracy analysis                    |
+| `fact_procurement`          | One row per purchase order         | Supplier fill rate, purchase amount, and receipt delay analysis                     |
+
+  
+
+The fact loading process also logs lookup problems if a fact row cannot find a matching dimension key.
+
+  
+
+### 4.8 Incremental Loading
+
+  
+
+The ETL supports both full rebuild and incremental mode.
+
+  
+
+Full rebuild:
+
+  
+
+```powershell
+
+python .\run_etl.py
+
+```
+
+  
+
+Incremental mode:
+
+  
+
+```powershell
+
+python .\run_etl.py --incremental
+
+```
+
+  
+
+In incremental mode, the existing warehouse is kept and only new fact rows are appended. The fact load checks natural keys before inserting:
+
+  
+
+```text
+
+transaction_id
+
+online_order_id
+
+inventory_record_id
+
+delivery_id
+
+purchase_order_id
+
+```
+
+  
+
+The full project can also run incrementally:
+
+  
+
+```powershell
+
+python .\run_project.py --incremental
+
+```
+
+  
+
+Streamlit does not trigger incremental ETL by itself. It reads the warehouse after the ETL has already been run.
+
+  
+
+## 5. SQL Script Order
+
+  
+
+The ETL SQL scripts run in this order:
+
+  
+
+
+| Order | SQL Script                   | What It Does                                                                            |
+|-------|------------------------------|-----------------------------------------------------------------------------------------|
+| 1     | `sql/01_schema.sql`          | Creates audit tables, mapping table, dimensions, facts, and unknown members.            |
+| 2     | `sql/02_staging.sql`         | Creates staging tables, cleans raw values, and flags invalid rows.                      |
+| 3     | `sql/03_transform.sql`       | Builds transform tables, standardizes values, calculates metrics, and logs rejected rows. |
+| 4     | `sql/03_load_dimensions.sql` | Loads date and business dimensions, including SCD-ready dimensions.                     |
+| 5     | `sql/04_load_facts.sql`      | Loads facts and records lookup issues.                                                  |
+| 6     | `sql/05_validation.sql`      | Contains reference validation queries.                                                  |
+
+  
+
+The full project runner uses this order:
+
+  
+
+
+| Step | Script                      | Purpose                             |
+|------|-----------------------------|-------------------------------------|
+| 1    | `run_etl.py`                | Build warehouse                     |
+| 2    | `run_validation.py`         | Generate validation evidence        |
+| 3    | `cube/run_cube.py`          | Create cube views                   |
+| 4    | `run_dashboard.py`          | Generate static HTML dashboard      |
+| 5    | `powerbi/export_powerbi.py` | Export Power BI-ready CSV files     |
+  
+
+## 6. Warehouse Model
+
+  
+
+The final warehouse uses a star-schema design.
+
+  
 
 ### Dimensions
 
-| Dimension | Description |
-|---|---|
-| `dim_date` | Calendar and fiscal date attributes. |
-| `dim_store` | Store profile, location, region, and type. |
-| `dim_product` | Product profile, category, cost, and price. |
-| `dim_customer` | Customer demographic and membership attributes. |
-| `dim_promotion` | Promotion and discount information. |
-| `dim_payment_method` | Payment type and provider details. |
-| `dim_channel` | Sales and order channel details. |
-| `dim_supplier` | Supplier profile and lead-time details. |
-| `dim_fulfilment_center` | Online order fulfilment center details. |
-| `dim_distribution_center` | Procurement and distribution center details. |
+  
+
+
+| Dimension                   | Purpose                                                       |
+|-----------------------------|---------------------------------------------------------------|
+| `dim_date`                  | Calendar, fiscal, month, quarter, and weekday attributes      |
+| `dim_store`                 | Store profile, location, region, and type                     |
+| `dim_product`               | Product, brand, category, cost, and price                     |
+| `dim_customer`              | Customer demographic and membership attributes                |
+| `dim_promotion`             | Promotion and discount information                            |
+| `dim_payment_method`        | Payment type and provider                                     |
+| `dim_channel`               | Store, online, app, delivery, and click-and-collect channels  |
+| `dim_supplier`              | Supplier profile and lead time                                |
+| `dim_fulfilment_center`     | Online fulfilment center profile                              |
+| `dim_distribution_center`   | Procurement and warehouse distribution profile                |
+
+  
 
 ### Facts
 
-| Fact Table | Grain |
-|---|---|
-| `fact_sales` | One row per sales transaction. |
-| `fact_online_orders` | One row per online order. |
-| `fact_inventory_daily` | One row per inventory record per day. |
-| `fact_delivery_performance` | One row per delivery record. |
-| `fact_procurement` | One row per purchase order. |
+  
 
-## Data Quality Features
 
-The project does not hide dirty data. It classifies and records it.
+| Fact                        | Business Process                              |
+|-----------------------------|-----------------------------------------------|
+| `fact_sales`                | Customer sales transactions                   |
+| `fact_online_orders`        | Online orders and fulfilment demand           |
+| `fact_inventory_daily`      | Inventory movement and stock accuracy         |
+| `fact_delivery_performance` | Delivery performance and delays               |
+| `fact_procurement`          | Supplier purchase orders and replenishment    |
 
-Quality issues are stored in:
+  
+
+### Omnichannel Connection
+
+  
+
+The warehouse supports omnichannel analysis because multiple facts share conformed dimensions:
+
+  
+
+
+| Shared Dimension | Connected Facts                                           |
+|------------------|-----------------------------------------------------------|
+| `dim_date`       | Sales, online orders, inventory, delivery, procurement    |
+| `dim_product`    | Sales, inventory, procurement                             |
+| `dim_customer`   | Sales, online orders                                      |
+| `dim_channel`    | Sales, online orders, delivery                            |
+| `dim_store`      | Sales, inventory                                          |
+  
+
+## 7. Outputs
+
+  
+
+Running the full project creates:
+
+  
 
 ```text
-data_quality_issue
+
+output\coles_warehouse_dw.sqlite
+
+output\validation_summary.md
+
+output\validation_*.csv
+
+output\dashboard.html
+
+output\powerbi\
+
 ```
 
-Common issue codes:
+  
+
+Important outputs:
+
+  
+
+
+| Output                             | Purpose                           |
+|------------------------------------|-----------------------------------|
+| `output\coles_warehouse_dw.sqlite` | Final warehouse database          |
+| `output\validation_summary.md`     | Human-readable validation summary |
+| `output\validation_*.csv`          | Validation evidence files         |
+| `output\dashboard.html`            | Static dashboard                  |
+| `output\powerbi\`                 | Power BI-ready CSV files          |
+  
+
+## 8. Streamlit Dashboard
+
+  
+
+The Streamlit app is:
+
+  
 
 ```text
-MISSING_REQUIRED_KEY
-DUPLICATE_BUSINESS_KEY
-INVALID_DATE
-INVALID_MEASURE
-LOOKUP_NOT_FOUND
-STAGING_REJECT
+
+streamlit_app.py
+
 ```
 
-ETL logs are stored in:
+  
+
+It reads:
+
+  
 
 ```text
-etl_load_batch
-etl_audit_log
-etl_error_log
+
+output\coles_warehouse_dw.sqlite
+
 ```
 
-Unknown dimension members are used when facts cannot find a valid dimension match. This keeps fact rows traceable instead of silently dropping them.
+  
 
-## Cube Views
+It displays:
 
-Cube views are flattened analytical views for easier reporting:
+  
+
+- Net Sales
+
+- Gross Profit
+
+- Gross Margin %
+
+- Online Order Value
+
+- Total Discount
+
+- Sales trend by month
+
+- Sales by region
+
+- Sales by product category
+
+- Top 10 products
+
+- Delivery status
+
+- On-time delivery performance
+
+- Data-quality issues
+
+- Fact-table row counts
+
+  
+
+The date filter `Rentang tanggal` is constrained to the available sales range:
+
+  
 
 ```text
+
+2025-01-04 to 2025-12-19
+
+```
+
+  
+
+If only one date is selected, the dashboard waits for the second date instead of showing misleading full-range values.
+
+  
+
+## 9. Validation
+
+  
+
+Validation is generated by:
+
+  
+
+```powershell
+
+python .\run_validation.py
+
+```
+
+  
+
+Validation files include:
+
+  
+
+
+| File                               | Checks                                           |
+|------------------------------------|--------------------------------------------------|
+| `validation_row_counts.csv`        | Dimension and fact row counts                    |
+| `validation_transform_counts.csv`  | Transform-layer row counts                       |
+| `validation_quality_issues.csv`    | Data-quality issues by layer and code            |
+| `validation_unknown_keys.csv`      | Unknown surrogate key usage                      |
+| `validation_negative_measures.csv` | Negative final fact measures                     |
+| `validation_scd_status.csv`        | Current and historical rows for SCD-ready dimensions |
+| `validation_sales_by_region.csv`   | Sales summary by region                          |
+  
+
+The project can still be valid even when data-quality issues exist. The source data is intentionally dirty, and the ETL is expected to classify and report those issues.
+
+  
+
+## 10. Cube Views and Power BI
+
+  
+
+The project creates OLAP-style cube views:
+
+  
+
+```text
+
 vw_cube_sales
+
 vw_cube_online_orders
+
 vw_cube_inventory
+
 vw_cube_delivery
+
 vw_cube_procurement
+
 ```
 
-Create them with:
+  
+
+Create cube views with:
+
+  
 
 ```powershell
+
 python .\cube\run_cube.py
+
 ```
 
-The Power BI export script also refreshes cube views automatically.
+  
 
-Use cube views for quick analysis and screenshots. Use the `dim_` and `fact_` tables when explaining the proper star schema model.
+Export Power BI-ready CSV files with:
 
-## Simple HTML Dashboard
-
-Power BI is optional for visualization. The project can generate a simple dashboard directly from the SQLite warehouse:
+  
 
 ```powershell
-python .\run_dashboard.py
-```
 
-The dashboard is created here:
-
-```text
-output\dashboard.html
-```
-
-Open that file in a browser to view:
-
-- net sales
-- gross profit
-- gross margin
-- online order value
-- on-time delivery percentage
-- data-quality issue count
-- sales by region
-- sales by product category
-- delivery status
-- ETL validation status
-
-This dashboard does not require Power BI relationships or manual model setup.
-
-If you only want a quick visual result, this is the easiest option:
-
-```powershell
-python .\run_project.py
-```
-
-Then open:
-
-```text
-output\dashboard.html
-```
-
-## Power BI Export
-
-Run:
-
-```powershell
 python .\powerbi\export_powerbi.py
+
 ```
 
-This creates CSV files in:
+  
+
+Power BI supporting files are in:
+
+  
 
 ```text
+
+powerbi\
+
+```
+
+  
+
+Useful files:
+
+  
+
+```text
+
+model_relationships.md
+
+dax_measures.md
+
+dashboard_blueprint.md
+
+final_dashboard_layout.md
+
+```
+
+  
+
+## 11. Setup
+
+  
+
+Open PowerShell in the project folder:
+
+  
+
+```powershell
+
+cd "C:\Users\Ichsan\Documents\6\Data Warehouse\ProjectColesWarehouse"
+
+```
+
+  
+
+Create a virtual environment:
+
+  
+
+```powershell
+
+python -m venv .venv
+
+```
+
+  
+
+If `python` is not recognized:
+
+  
+
+```powershell
+
+py -m venv .venv
+
+```
+
+  
+
+Activate it:
+
+  
+
+```powershell
+
+.\.venv\Scripts\Activate.ps1
+
+```
+
+  
+
+Install dependencies:
+
+  
+
+```powershell
+
+pip install -r requirements.txt
+
+```
+
+  
+
+Dependencies:
+
+  
+
+```text
+
+Pillow
+
+streamlit
+
+pandas
+
+```
+
+  
+
+## 12. Running the Project
+
+  
+
+Run the full project:
+
+  
+
+```powershell
+
+python .\run_project.py
+
+```
+
+  
+
+Run the full project incrementally:
+
+  
+
+```powershell
+
+python .\run_project.py --incremental
+
+```
+
+  
+
+Run the full project without Power BI export:
+
+  
+
+```powershell
+
+python .\run_project.py --skip-powerbi
+
+```
+
+  
+
+Run only ETL:
+
+  
+
+```powershell
+
+python .\run_etl.py
+
+```
+
+  
+
+Run only validation:
+
+  
+
+```powershell
+
+python .\run_validation.py
+
+```
+
+  
+
+Run Streamlit:
+
+  
+
+```powershell
+
+.\.venv\Scripts\python.exe -m streamlit run streamlit_app.py
+
+```
+
+  
+
+If port `8501` is busy:
+
+  
+
+```powershell
+
+.\.venv\Scripts\python.exe -m streamlit run streamlit_app.py --server.port 8502
+
+```
+
+  
+
+## 13. Folder Structure
+
+  
+
+```text
+
+ProjectColesWarehouse/
+├── README.md
+├── requirements.txt
+├── run_project.py
+├── run_etl.py
+├── run_validation.py
+├── run_dashboard.py
+├── streamlit_app.py
+│
+├── data/
+│   ├── raw/
+│   ├── coles_dirty_source_50_records.sqlite
+│   └── csv/
+│
+├── sql/
+│   ├── 01_schema.sql
+│   ├── 02_staging.sql
+│   ├── 03_transform.sql
+│   ├── 03_load_dimensions.sql
+│   ├── 04_load_facts.sql
+│   └── 05_validation.sql
+│
+├── cube/
+│   ├── run_cube.py
+│   └── olap_cube_views.sql
+│
+├── powerbi/
+│   ├── export_powerbi.py
+│   ├── model_relationships.md
+│   ├── dax_measures.md
+│   ├── dashboard_blueprint.md
+│   └── final_dashboard_layout.md
+│
+└── output/
+    ├── coles_warehouse_dw.sqlite
+    ├── validation_summary.md
+    ├── validation_*.csv
+    ├── dashboard.html
+    └── powerbi/
+
+```
+
+  
+
+## 14. Demo Checklist
+
+  
+
+For a final demo:
+
+  
+
+1. Run the full pipeline.
+
+  
+
+```powershell
+
+python .\run_project.py
+
+```
+
+  
+
+2. Show the final warehouse:
+
+  
+
+```text
+
+output\coles_warehouse_dw.sqlite
+
+```
+
+  
+
+3. Show validation evidence:
+
+  
+
+```text
+
+output\validation_summary.md
+
+output\validation_*.csv
+
+```
+
+  
+
+4. Open Streamlit:
+
+  
+
+```powershell
+
+.\.venv\Scripts\python.exe -m streamlit run streamlit_app.py
+
+```
+
+  
+
+5. Show Power BI export files:
+
+  
+
+```text
+
 output\powerbi\
+
 ```
 
-The export includes:
+  
 
-- dimensions
-- facts
-- transform tables
-- audit logs
-- data-quality tables
-- cube views
+6. Explain the omnichannel purpose:
 
-For the main Power BI model, import:
+  
 
 ```text
-dim_date
-dim_store
-dim_product
-dim_customer
-dim_promotion
-dim_payment_method
-dim_channel
-dim_supplier
-dim_fulfilment_center
-dim_distribution_center
-fact_sales
-fact_online_orders
-fact_inventory_daily
-fact_delivery_performance
-fact_procurement
+
+The warehouse connects sales, online orders, delivery, inventory, procurement, customers, products, stores, and channels into one analytical model.
+
 ```
 
-Recommended relationship direction:
+  
 
-```text
-dimension -> fact
+## 15. Troubleshooting
+
+  
+
+### `python` is not recognized
+
+  
+
+Try:
+
+  
+
+```powershell
+
+py --version
+
 ```
 
-Use single-direction, one-to-many relationships from dimensions to facts.
+  
 
-## Power BI Supporting Files
+If `py` works, use `py` instead of `python`.
 
-Use these documents when building the dashboard:
+  
 
-```text
-powerbi\model_relationships.md
-powerbi\dax_measures.md
-powerbi\dashboard_blueprint.md
-powerbi\final_dashboard_layout.md
+### `streamlit` is not recognized
+
+  
+
+Use:
+
+  
+
+```powershell
+
+.\.venv\Scripts\python.exe -m streamlit run streamlit_app.py
+
 ```
 
-Recommended dashboard pages:
+  
 
-```text
-1. Executive Overview
-2. Sales and Omnichannel
-3. Inventory
-4. Delivery and Fulfillment
-5. Procurement
-6. ETL Health
-```
+### Warehouse database not found
 
-The ETL Health page is important because it proves the project is not only a reporting dashboard. It shows validation, audit logging, data-quality handling, and batch tracking.
-
-## Quick Final Demo Checklist
+  
 
 Run:
 
+  
+
 ```powershell
+
 python .\run_project.py
+
 ```
 
-Check that these exist:
+  
+
+The Streamlit app needs:
+
+  
 
 ```text
+
 output\coles_warehouse_dw.sqlite
-output\validation_summary.md
-output\validation_row_counts.csv
-output\validation_quality_issues.csv
-output\dashboard.html
-output\powerbi\
+
 ```
 
-Open the SQLite warehouse with DB Browser for SQLite:
+  
+
+### SQLite database is locked
+
+  
+
+Close DB Browser for SQLite, Power BI, Streamlit, or any other app using:
+
+  
 
 ```text
+
 output\coles_warehouse_dw.sqlite
+
 ```
 
-Open the validation summary:
+  
 
-```text
-output\validation_summary.md
-```
+Then rerun the pipeline.
 
-Open the generated HTML dashboard:
+  
 
-```text
-output\dashboard.html
-```
+## 16. Future Omnichannel Improvements
 
-Build the Power BI dashboard using:
+  
 
-```text
-output\powerbi\
-```
+The current project is a strong foundation, but full omnichannel analytics can be improved further.
 
-## Notes
+  
 
-- This project does not require SQL Server.
-- SQLite is used to keep the project portable.
-- Python is used as the runner and orchestrator.
-- SQL contains the main ETL and warehouse logic.
-- CSV files are used as extracts and Power BI inputs, not as the main warehouse product.
-- The final project evidence is the warehouse database, validation reports, logs, cube views, and Power BI export package.
+Future progress steps:
+
+  
+
+1. Standardize channel grouping more clearly across store, online, mobile app, click-and-collect, and home delivery.
+
+2. Add customer journey events such as product view, cart add, order placed, store purchase, pickup, delivery completed, and return created.
+
+3. Add returns and refunds so revenue analysis includes post-purchase behavior.
+
+4. Improve promotion attribution across sales and online orders.
+
+5. Connect inventory availability to sales performance to identify stockout impact.
+
+6. Expand delivery KPIs with fulfilment time, SLA breach rate, delivery partner performance, and order accuracy.
+
+8.  Add scheduled refresh or automation for ETL, validation, and export steps.
+
+  
+
+## 17. Conclusion
+
+  
+
+This project demonstrates a complete local warehouse workflow for omnichannel retail analytics. It extracts dirty operational data, stages and validates it, transforms it into business-ready records, loads dimensions and facts, records data-quality evidence, creates cube views, and supports reporting through Streamlit, static HTML, and Power BI exports.

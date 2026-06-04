@@ -292,7 +292,7 @@ def main():
 <body>
   <header>
     <h1>Coles Data Warehouse Dashboard</h1>
-    <p>Generated directly from the SQLite warehouse. No Power BI model setup required.</p>
+    <p>Omnichannel retail performance across sales, delivery, inventory, and warehouse health.</p>
   </header>
   <main>
     <div class="kpis">
