@@ -1,5 +1,12 @@
+-- File ini menyiapkan struktur utama data warehouse.
+-- Isinya mencakup tabel audit ETL, tabel data quality, mapping nilai standar,
+-- tabel dimensi, tabel fakta, serta baris default untuk nilai Unknown.
+
+-- Mengaktifkan pengecekan foreign key di SQLite agar relasi antar tabel lebih aman.
 PRAGMA foreign_keys = ON;
 
+-- Menyimpan informasi setiap proses ETL, seperti batch id, mode load, waktu mulai,
+-- waktu selesai, dan status proses.
 CREATE TABLE IF NOT EXISTS etl_load_batch (
     batch_id TEXT PRIMARY KEY,
     run_mode TEXT NOT NULL,
@@ -9,6 +16,7 @@ CREATE TABLE IF NOT EXISTS etl_load_batch (
     status TEXT NOT NULL DEFAULT 'RUNNING'
 );
 
+-- Menyimpan error teknis atau data bermasalah yang ditemukan selama proses ETL.
 CREATE TABLE IF NOT EXISTS etl_error_log (
     error_id INTEGER PRIMARY KEY AUTOINCREMENT,
     batch_id TEXT NOT NULL,
@@ -20,6 +28,8 @@ CREATE TABLE IF NOT EXISTS etl_error_log (
     error_date TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Menyimpan isu kualitas data secara lebih terstruktur, misalnya missing key,
+-- duplikasi business key, invalid date, atau lookup yang tidak ditemukan.
 CREATE TABLE IF NOT EXISTS data_quality_issue (
     issue_id INTEGER PRIMARY KEY AUTOINCREMENT,
     batch_id TEXT NOT NULL,
@@ -32,6 +42,8 @@ CREATE TABLE IF NOT EXISTS data_quality_issue (
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Menyimpan ringkasan audit per proses ETL, termasuk jumlah row yang diekstrak,
+-- berhasil dimuat, ditolak, dan status prosesnya.
 CREATE TABLE IF NOT EXISTS etl_audit_log (
     audit_id INTEGER PRIMARY KEY AUTOINCREMENT,
     batch_id TEXT NOT NULL,
@@ -45,6 +57,8 @@ CREATE TABLE IF NOT EXISTS etl_audit_log (
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Tabel mapping untuk menyeragamkan nilai teks yang berbeda penulisannya,
+-- contohnya "super market" menjadi "Supermarket".
 CREATE TABLE IF NOT EXISTS map_standard_value (
     map_group TEXT NOT NULL,
     raw_value TEXT NOT NULL,
@@ -52,6 +66,7 @@ CREATE TABLE IF NOT EXISTS map_standard_value (
     PRIMARY KEY (map_group, raw_value)
 );
 
+-- Mengisi mapping standar yang dipakai saat proses cleansing dan transformasi data.
 INSERT OR IGNORE INTO map_standard_value VALUES
 ('store_type', 'super market', 'Supermarket'),
 ('store_type', 'supermarket', 'Supermarket'),
@@ -93,6 +108,8 @@ INSERT OR IGNORE INTO map_standard_value VALUES
 ('po_status', 'ordered', 'ordered'),
 ('po_status', 'cancelled', 'cancelled');
 
+-- Dimensi tanggal untuk analisis berdasarkan hari, bulan, kuartal, tahun,
+-- weekend, dan periode fiskal.
 CREATE TABLE IF NOT EXISTS dim_date (
     date_key INTEGER PRIMARY KEY,
     full_date TEXT NOT NULL UNIQUE,
@@ -114,6 +131,8 @@ CREATE TABLE IF NOT EXISTS dim_date (
     load_batch_id TEXT
 );
 
+-- Dimensi toko. Tabel ini memakai SCD Type 2 agar perubahan atribut toko
+-- bisa disimpan sebagai histori, bukan menimpa data lama.
 CREATE TABLE IF NOT EXISTS dim_store (
     store_key INTEGER PRIMARY KEY AUTOINCREMENT,
     store_id TEXT NOT NULL,
@@ -134,6 +153,8 @@ CREATE TABLE IF NOT EXISTS dim_store (
     FOREIGN KEY (open_date_key) REFERENCES dim_date(date_key)
 );
 
+-- Dimensi produk. Memuat atribut produk dan disiapkan untuk histori perubahan
+-- harga, kategori, brand, dan status aktif.
 CREATE TABLE IF NOT EXISTS dim_product (
     product_key INTEGER PRIMARY KEY AUTOINCREMENT,
     product_id TEXT NOT NULL,
@@ -152,6 +173,8 @@ CREATE TABLE IF NOT EXISTS dim_product (
     UNIQUE (product_id, effective_start_date_key)
 );
 
+-- Dimensi customer. Menyimpan profil customer dan mendukung histori perubahan
+-- atribut seperti membership, kota, atau email.
 CREATE TABLE IF NOT EXISTS dim_customer (
     customer_key INTEGER PRIMARY KEY AUTOINCREMENT,
     customer_id TEXT NOT NULL,
@@ -171,6 +194,8 @@ CREATE TABLE IF NOT EXISTS dim_customer (
     FOREIGN KEY (join_date_key) REFERENCES dim_date(date_key)
 );
 
+-- Dimensi promosi untuk menghubungkan transaksi penjualan dengan jenis diskon
+-- atau campaign tertentu.
 CREATE TABLE IF NOT EXISTS dim_promotion (
     promotion_key INTEGER PRIMARY KEY AUTOINCREMENT,
     promotion_id TEXT NOT NULL UNIQUE,
@@ -185,6 +210,8 @@ CREATE TABLE IF NOT EXISTS dim_promotion (
     FOREIGN KEY (end_date_key) REFERENCES dim_date(date_key)
 );
 
+-- Dimensi metode pembayaran untuk mengelompokkan transaksi berdasarkan tipe
+-- pembayaran dan provider.
 CREATE TABLE IF NOT EXISTS dim_payment_method (
     payment_method_key INTEGER PRIMARY KEY AUTOINCREMENT,
     payment_method_id TEXT NOT NULL UNIQUE,
@@ -195,6 +222,8 @@ CREATE TABLE IF NOT EXISTS dim_payment_method (
     loaded_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Dimensi channel untuk membedakan sumber transaksi, misalnya store,
+-- eCommerce, mobile app, click and collect, atau home delivery.
 CREATE TABLE IF NOT EXISTS dim_channel (
     channel_key INTEGER PRIMARY KEY AUTOINCREMENT,
     channel_id TEXT NOT NULL UNIQUE,
@@ -205,6 +234,8 @@ CREATE TABLE IF NOT EXISTS dim_channel (
     loaded_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Dimensi supplier. Tabel ini juga memakai SCD Type 2 agar perubahan informasi
+-- supplier bisa dilacak.
 CREATE TABLE IF NOT EXISTS dim_supplier (
     supplier_key INTEGER PRIMARY KEY AUTOINCREMENT,
     supplier_id TEXT NOT NULL,
@@ -221,6 +252,7 @@ CREATE TABLE IF NOT EXISTS dim_supplier (
     UNIQUE (supplier_id, effective_start_date_key)
 );
 
+-- Dimensi fulfilment center untuk pesanan online dan operasional fulfilment.
 CREATE TABLE IF NOT EXISTS dim_fulfilment_center (
     fulfilment_center_key INTEGER PRIMARY KEY AUTOINCREMENT,
     fulfilment_center_id TEXT NOT NULL UNIQUE,
@@ -232,6 +264,7 @@ CREATE TABLE IF NOT EXISTS dim_fulfilment_center (
     loaded_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Dimensi distribution center untuk proses procurement dan distribusi barang.
 CREATE TABLE IF NOT EXISTS dim_distribution_center (
     distribution_center_key INTEGER PRIMARY KEY AUTOINCREMENT,
     distribution_center_id TEXT NOT NULL UNIQUE,
@@ -243,6 +276,8 @@ CREATE TABLE IF NOT EXISTS dim_distribution_center (
     loaded_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Fact sales menyimpan transaksi penjualan toko maupun channel terkait.
+-- Tabel ini berisi measure utama seperti quantity, net sales, cost, profit, dan margin.
 CREATE TABLE IF NOT EXISTS fact_sales (
     sales_key INTEGER PRIMARY KEY AUTOINCREMENT,
     transaction_id TEXT NOT NULL UNIQUE,
@@ -274,6 +309,7 @@ CREATE TABLE IF NOT EXISTS fact_sales (
     FOREIGN KEY (channel_key) REFERENCES dim_channel(channel_key)
 );
 
+-- Fact online orders menyimpan transaksi order online dan status fulfilment-nya.
 CREATE TABLE IF NOT EXISTS fact_online_orders (
     online_order_key INTEGER PRIMARY KEY AUTOINCREMENT,
     online_order_id TEXT NOT NULL UNIQUE,
@@ -295,6 +331,7 @@ CREATE TABLE IF NOT EXISTS fact_online_orders (
     FOREIGN KEY (channel_key) REFERENCES dim_channel(channel_key)
 );
 
+-- Fact inventory daily menyimpan posisi stok harian dan perhitungan selisih stok.
 CREATE TABLE IF NOT EXISTS fact_inventory_daily (
     inventory_key INTEGER PRIMARY KEY AUTOINCREMENT,
     inventory_record_id TEXT NOT NULL UNIQUE,
@@ -317,6 +354,8 @@ CREATE TABLE IF NOT EXISTS fact_inventory_daily (
     FOREIGN KEY (product_key) REFERENCES dim_product(product_key)
 );
 
+-- Fact delivery performance menyimpan performa pengiriman, keterlambatan,
+-- status delivery, dan akurasi order.
 CREATE TABLE IF NOT EXISTS fact_delivery_performance (
     delivery_key INTEGER PRIMARY KEY AUTOINCREMENT,
     delivery_id TEXT NOT NULL UNIQUE,
@@ -337,6 +376,8 @@ CREATE TABLE IF NOT EXISTS fact_delivery_performance (
     FOREIGN KEY (actual_date_key) REFERENCES dim_date(date_key)
 );
 
+-- Fact procurement menyimpan pembelian dari supplier, penerimaan barang,
+-- fill rate, nilai pembelian, dan keterlambatan receipt.
 CREATE TABLE IF NOT EXISTS fact_procurement (
     procurement_key INTEGER PRIMARY KEY AUTOINCREMENT,
     purchase_order_id TEXT NOT NULL UNIQUE,
@@ -363,9 +404,12 @@ CREATE TABLE IF NOT EXISTS fact_procurement (
     FOREIGN KEY (actual_receipt_date_key) REFERENCES dim_date(date_key)
 );
 
+-- Membuat catatan batch ETL yang sedang berjalan.
 INSERT OR IGNORE INTO etl_load_batch (batch_id, run_mode, source_database, status)
 VALUES (BATCH_ID(), RUN_MODE(), 'raw attached database', 'RUNNING');
 
+-- Menambahkan baris default Unknown pada setiap dimensi.
+-- Baris ini dipakai ketika lookup dimensi gagal, supaya fact table tetap bisa dimuat.
 INSERT OR IGNORE INTO dim_date (
     date_key, full_date, year, quarter, quarter_name, month, month_name, year_month,
     week_number, day, day_of_week, day_of_week_number, is_weekend,

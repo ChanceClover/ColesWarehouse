@@ -2,13 +2,27 @@
 __pycache__/
 *.pyc
 .venv/
+.pytest_cache/
 
 # Generated warehouse outputs
 output/
 
+# SQLite runtime sidecar files
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite-journal
+*.db-shm
+*.db-wal
+*.db-journal
+
+# Streamlit local config/runtime files
+.streamlit/
+
 # Local Power BI temp/cache files
 *.tmp
 *.log
+~$*.pbix
+~$*.pbit
 
 # OS/editor files
 .DS_Store

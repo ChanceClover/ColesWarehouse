@@ -1,3 +1,9 @@
+-- File ini memuat data transaksi dari transform layer ke fact table.
+-- Prosesnya melakukan lookup surrogate key ke dimensi, mencatat lookup yang gagal,
+-- mencegah duplikasi fact row, dan menutup status batch ETL.
+
+-- Mengecek transaksi sales yang business key dimensinya tidak ditemukan.
+-- Masalah dicatat sebagai WARNING karena fact masih bisa dimuat memakai unknown key = 0.
 INSERT INTO data_quality_issue (batch_id, layer_name, source_table, source_id, issue_code, issue_message, severity)
 SELECT BATCH_ID(), 'lookup', 'trf_sales', s.transaction_id, 'LOOKUP_NOT_FOUND',
        TRIM(
@@ -20,6 +26,7 @@ WHERE ds.store_key IS NULL OR dp.product_key IS NULL OR dc.customer_key IS NULL
    OR (s.promotion_id IS NOT NULL AND dpr.promotion_key IS NULL)
    OR dpm.payment_method_key IS NULL OR dch.channel_key IS NULL;
 
+-- Menyalin warning lookup sales ke error log agar mudah diaudit.
 INSERT INTO etl_error_log (batch_id, source_table, source_id, error_type, error_description)
 SELECT batch_id, source_table, source_id, issue_code, issue_message
 FROM data_quality_issue
@@ -27,6 +34,8 @@ WHERE batch_id = BATCH_ID()
   AND layer_name = 'lookup'
   AND source_table = 'trf_sales';
 
+-- Memuat fact_sales dengan surrogate key dari dimensi.
+-- COALESCE(..., 0) dipakai agar data tetap masuk sebagai Unknown jika lookup gagal.
 INSERT INTO fact_sales (
     transaction_id, date_key, store_key, product_key, customer_key, promotion_key,
     payment_method_key, channel_key, quantity_sold, unit_price, total_sales_amount,
@@ -49,6 +58,7 @@ WHERE NOT EXISTS (
     SELECT 1 FROM fact_sales f WHERE f.transaction_id = s.transaction_id
 );
 
+-- Mengecek lookup customer, fulfilment center, dan channel untuk online orders.
 INSERT INTO data_quality_issue (batch_id, layer_name, source_table, source_id, issue_code, issue_message, severity)
 SELECT BATCH_ID(), 'lookup', 'trf_online_orders', o.online_order_id, 'LOOKUP_NOT_FOUND',
        TRIM(
@@ -63,6 +73,7 @@ LEFT JOIN dim_fulfilment_center dfc ON dfc.fulfilment_center_id = o.fulfilment_c
 LEFT JOIN dim_channel dch ON dch.channel_id = o.channel_id
 WHERE dc.customer_key IS NULL OR dfc.fulfilment_center_key IS NULL OR dch.channel_key IS NULL;
 
+-- Memuat fact_online_orders dan mencegah duplikasi berdasarkan online_order_id.
 INSERT INTO fact_online_orders (
     online_order_id, order_date_key, customer_key, fulfilment_center_key, channel_key,
     item_count, order_value, delivery_fee, total_order_value, order_status, fulfilled_flag, load_batch_id
@@ -79,6 +90,7 @@ WHERE NOT EXISTS (
     SELECT 1 FROM fact_online_orders f WHERE f.online_order_id = o.online_order_id
 );
 
+-- Mengecek lookup toko dan produk untuk data inventory harian.
 INSERT INTO data_quality_issue (batch_id, layer_name, source_table, source_id, issue_code, issue_message, severity)
 SELECT BATCH_ID(), 'lookup', 'trf_inventory', i.inventory_record_id, 'LOOKUP_NOT_FOUND',
        TRIM(
@@ -91,6 +103,8 @@ LEFT JOIN dim_store ds ON ds.store_id = i.store_id AND ds.is_current = 1
 LEFT JOIN dim_product dp ON dp.product_id = i.product_id AND dp.is_current = 1
 WHERE ds.store_key IS NULL OR dp.product_key IS NULL;
 
+-- Memuat fact_inventory_daily berisi stok masuk, keluar, loss, closing stock,
+-- variance, dan shrinkage rate.
 INSERT INTO fact_inventory_daily (
     inventory_record_id, snapshot_date_key, store_key, product_key,
     opening_stock, stock_in, stock_out, stock_loss, closing_stock,
@@ -106,6 +120,7 @@ WHERE NOT EXISTS (
     SELECT 1 FROM fact_inventory_daily f WHERE f.inventory_record_id = i.inventory_record_id
 );
 
+-- Mengecek apakah delivery memiliki online order yang sudah berhasil dimuat.
 INSERT INTO data_quality_issue (batch_id, layer_name, source_table, source_id, issue_code, issue_message, severity)
 SELECT BATCH_ID(), 'lookup', 'trf_delivery', d.delivery_id, 'LOOKUP_NOT_FOUND',
        'online_order_id not found in loaded online order fact',
@@ -114,6 +129,8 @@ FROM trf_delivery d
 LEFT JOIN fact_online_orders foo ON foo.online_order_id = d.online_order_id
 WHERE foo.online_order_key IS NULL;
 
+-- Memuat fact_delivery_performance. Delivery hanya dimuat jika online order-nya ditemukan,
+-- karena delivery bergantung pada fact_online_orders.
 INSERT INTO fact_delivery_performance (
     delivery_id, online_order_key, promised_date_key, actual_date_key, delivery_partner,
     delivery_status, delivery_time_minutes, delay_minutes, delay_hours, on_time_flag,
@@ -129,6 +146,7 @@ WHERE foo.online_order_key IS NOT NULL
       SELECT 1 FROM fact_delivery_performance f WHERE f.delivery_id = d.delivery_id
   );
 
+-- Mengecek lookup supplier, distribution center, dan produk untuk procurement.
 INSERT INTO data_quality_issue (batch_id, layer_name, source_table, source_id, issue_code, issue_message, severity)
 SELECT BATCH_ID(), 'lookup', 'trf_procurement', p.purchase_order_id, 'LOOKUP_NOT_FOUND',
        TRIM(
@@ -143,6 +161,8 @@ LEFT JOIN dim_distribution_center ddc ON ddc.distribution_center_id = p.distribu
 LEFT JOIN dim_product dp ON dp.product_id = p.product_id AND dp.is_current = 1
 WHERE ds.supplier_key IS NULL OR ddc.distribution_center_key IS NULL OR dp.product_key IS NULL;
 
+-- Memuat fact_procurement untuk analisis pembelian, fill rate,
+-- nilai pembelian, dan keterlambatan penerimaan barang.
 INSERT INTO fact_procurement (
     purchase_order_id, purchase_order_date_key, supplier_key, distribution_center_key, product_key,
     ordered_qty, received_qty, fill_rate, purchase_amount, expected_receipt_date_key,
@@ -161,6 +181,7 @@ WHERE NOT EXISTS (
     SELECT 1 FROM fact_procurement f WHERE f.purchase_order_id = p.purchase_order_id
 );
 
+-- Menyalin semua warning lookup selain sales ke etl_error_log.
 INSERT INTO etl_error_log (batch_id, source_table, source_id, error_type, error_description)
 SELECT batch_id, source_table, source_id, issue_code, issue_message
 FROM data_quality_issue
@@ -168,6 +189,7 @@ WHERE batch_id = BATCH_ID()
   AND layer_name = 'lookup'
   AND source_table <> 'trf_sales';
 
+-- Audit load fact_sales.
 INSERT INTO etl_audit_log (batch_id, process_name, source_table, target_table, rows_extracted, rows_loaded, rows_rejected, status)
 SELECT BATCH_ID(), 'load_fact_sales', 'trf_sales', 'fact_sales',
        (SELECT COUNT(*) FROM trf_sales),
@@ -175,6 +197,7 @@ SELECT BATCH_ID(), 'load_fact_sales', 'trf_sales', 'fact_sales',
        (SELECT COUNT(*) FROM data_quality_issue WHERE batch_id = BATCH_ID() AND source_table = 'trf_sales'),
        'SUCCESS';
 
+-- Audit load fact_online_orders.
 INSERT INTO etl_audit_log (batch_id, process_name, source_table, target_table, rows_extracted, rows_loaded, rows_rejected, status)
 SELECT BATCH_ID(), 'load_fact_online_orders', 'trf_online_orders', 'fact_online_orders',
        (SELECT COUNT(*) FROM trf_online_orders),
@@ -182,6 +205,7 @@ SELECT BATCH_ID(), 'load_fact_online_orders', 'trf_online_orders', 'fact_online_
        (SELECT COUNT(*) FROM data_quality_issue WHERE batch_id = BATCH_ID() AND source_table = 'trf_online_orders'),
        'SUCCESS';
 
+-- Audit load fact_inventory_daily.
 INSERT INTO etl_audit_log (batch_id, process_name, source_table, target_table, rows_extracted, rows_loaded, rows_rejected, status)
 SELECT BATCH_ID(), 'load_fact_inventory_daily', 'trf_inventory', 'fact_inventory_daily',
        (SELECT COUNT(*) FROM trf_inventory),
@@ -189,6 +213,7 @@ SELECT BATCH_ID(), 'load_fact_inventory_daily', 'trf_inventory', 'fact_inventory
        (SELECT COUNT(*) FROM data_quality_issue WHERE batch_id = BATCH_ID() AND source_table = 'trf_inventory'),
        'SUCCESS';
 
+-- Audit load fact_delivery_performance.
 INSERT INTO etl_audit_log (batch_id, process_name, source_table, target_table, rows_extracted, rows_loaded, rows_rejected, status)
 SELECT BATCH_ID(), 'load_fact_delivery_performance', 'trf_delivery', 'fact_delivery_performance',
        (SELECT COUNT(*) FROM trf_delivery),
@@ -196,6 +221,7 @@ SELECT BATCH_ID(), 'load_fact_delivery_performance', 'trf_delivery', 'fact_deliv
        (SELECT COUNT(*) FROM data_quality_issue WHERE batch_id = BATCH_ID() AND source_table = 'trf_delivery'),
        'SUCCESS';
 
+-- Audit load fact_procurement.
 INSERT INTO etl_audit_log (batch_id, process_name, source_table, target_table, rows_extracted, rows_loaded, rows_rejected, status)
 SELECT BATCH_ID(), 'load_fact_procurement', 'trf_procurement', 'fact_procurement',
        (SELECT COUNT(*) FROM trf_procurement),
@@ -203,6 +229,7 @@ SELECT BATCH_ID(), 'load_fact_procurement', 'trf_procurement', 'fact_procurement
        (SELECT COUNT(*) FROM data_quality_issue WHERE batch_id = BATCH_ID() AND source_table = 'trf_procurement'),
        'SUCCESS';
 
+-- Menandai batch ETL selesai setelah semua fact table berhasil diproses.
 UPDATE etl_load_batch
 SET completed_at = CURRENT_TIMESTAMP,
     status = 'SUCCESS'

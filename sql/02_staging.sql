@@ -1,3 +1,8 @@
+-- File ini membuat staging layer dari tabel raw.
+-- Tujuannya membersihkan format dasar, menyeragamkan nilai, mengecek duplikasi,
+-- dan memberi tanda data valid/tidak valid sebelum masuk transform layer.
+
+-- Menghapus ulang staging table agar setiap run ETL mulai dari staging yang bersih.
 DROP TABLE IF EXISTS stg_stores;
 DROP TABLE IF EXISTS stg_products;
 DROP TABLE IF EXISTS stg_customers;
@@ -13,6 +18,8 @@ DROP TABLE IF EXISTS stg_inventory;
 DROP TABLE IF EXISTS stg_delivery;
 DROP TABLE IF EXISTS stg_procurement;
 
+-- Staging toko: membersihkan ID/nama toko, menyeragamkan tipe toko,
+-- dan menandai store_id yang kosong atau duplikat.
 CREATE TABLE stg_stores AS
 WITH base AS (
     SELECT
@@ -48,6 +55,8 @@ SELECT *,
     ) AS error_reason
 FROM ranked;
 
+-- Staging produk: membersihkan atribut produk, kategori, harga, cost,
+-- dan menolak produk yang ID/harga/cost-nya tidak valid.
 CREATE TABLE stg_products AS
 WITH base AS (
     SELECT
@@ -90,6 +99,8 @@ SELECT *,
     ) AS error_reason
 FROM ranked;
 
+-- Staging customer: membersihkan profil customer, menentukan age group,
+-- mengecek format email sederhana, dan menolak customer tanpa ID atau birth year valid.
 CREATE TABLE stg_customers AS
 WITH base AS (
     SELECT
@@ -138,6 +149,7 @@ SELECT *,
     ) AS error_reason
 FROM ranked;
 
+-- Staging promosi: membersihkan promosi, tipe promosi, diskon, dan periode aktif.
 CREATE TABLE stg_promotions AS
 WITH base AS (
     SELECT
@@ -177,6 +189,7 @@ SELECT *,
     ) AS error_reason
 FROM ranked;
 
+-- Staging metode pembayaran: membersihkan payment method dan flag support online.
 CREATE TABLE stg_payment_methods AS
 WITH base AS (
     SELECT
@@ -199,6 +212,7 @@ SELECT *,
     ) AS error_reason
 FROM ranked;
 
+-- Staging channel: membersihkan nama channel dan mengelompokkan channel transaksi.
 CREATE TABLE stg_channels AS
 WITH base AS (
     SELECT
@@ -229,6 +243,7 @@ SELECT *,
     ) AS error_reason
 FROM ranked;
 
+-- Staging supplier: membersihkan data supplier dan lead time pengiriman.
 CREATE TABLE stg_suppliers AS
 WITH base AS (
     SELECT
@@ -254,6 +269,7 @@ SELECT *,
     ) AS error_reason
 FROM ranked;
 
+-- Staging fulfilment center: membersihkan data pusat fulfilment untuk order online.
 CREATE TABLE stg_fulfilment_centers AS
 WITH base AS (
     SELECT
@@ -278,6 +294,7 @@ SELECT *,
     ) AS error_reason
 FROM ranked;
 
+-- Staging distribution center: membersihkan data warehouse/distribution center.
 CREATE TABLE stg_distribution_centers AS
 WITH base AS (
     SELECT
@@ -302,6 +319,8 @@ SELECT *,
     ) AS error_reason
 FROM ranked;
 
+-- Staging sales: membersihkan transaksi penjualan, foreign key bisnis,
+-- nilai penjualan, diskon, cost, dan currency.
 CREATE TABLE stg_sales AS
 WITH base AS (
     SELECT
@@ -351,6 +370,8 @@ SELECT *,
     ) AS error_reason
 FROM ranked;
 
+-- Staging online orders: membersihkan order online, nilai order,
+-- delivery fee, channel, fulfilment center, dan status order.
 CREATE TABLE stg_online_orders AS
 WITH base AS (
     SELECT
@@ -393,6 +414,8 @@ SELECT *,
     ) AS error_reason
 FROM ranked;
 
+-- Staging inventory: membersihkan data stok harian dan menghitung closing stock
+-- hasil kalkulasi untuk dibandingkan dengan data sumber.
 CREATE TABLE stg_inventory AS
 SELECT
     ROW_NUMBER() OVER () AS source_row_id,
@@ -427,6 +450,8 @@ SELECT
     ) AS error_reason
 FROM raw.raw_inventory_movements;
 
+-- Staging delivery: membersihkan data pengiriman, tanggal promise/actual,
+-- durasi delivery, status, dan flag akurasi order.
 CREATE TABLE stg_delivery AS
 SELECT
     ROW_NUMBER() OVER () AS source_row_id,
@@ -460,6 +485,8 @@ SELECT
     ) AS error_reason
 FROM raw.raw_delivery_logs;
 
+-- Staging procurement: membersihkan purchase order, supplier, distribution center,
+-- quantity, nilai pembelian, tanggal receipt, dan status PO.
 CREATE TABLE stg_procurement AS
 SELECT
     ROW_NUMBER() OVER () AS source_row_id,

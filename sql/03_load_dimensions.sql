@@ -1,3 +1,9 @@
+-- File ini memuat data transform ke tabel dimensi warehouse.
+-- Beberapa dimensi memakai SCD Type 2, sehingga perubahan atribut disimpan
+-- sebagai versi histori dan row terbaru ditandai dengan is_current = 1.
+
+-- Mengisi dim_date dari semua tanggal yang muncul di transform layer.
+-- Ini membuat kalender warehouse otomatis mengikuti data yang tersedia.
 INSERT OR IGNORE INTO dim_date (
     date_key, full_date, year, quarter, quarter_name, month, month_name, year_month,
     week_number, day, day_of_week, day_of_week_number, is_weekend,
@@ -50,6 +56,8 @@ FROM (
 )
 WHERE full_date IS NOT NULL;
 
+-- SCD Type 2 untuk dim_store: jika atribut toko berubah,
+-- row lama ditutup dengan is_current = 0 dan effective_end_date_key diisi.
 UPDATE dim_store
 SET is_current = 0,
     effective_end_date_key = CAST(strftime('%Y%m%d', 'now') AS INTEGER)
@@ -70,6 +78,7 @@ WHERE is_current = 1
         )
   );
 
+-- Menambahkan row toko baru atau versi toko terbaru yang belum ada sebagai current row.
 INSERT INTO dim_store (
     store_id, store_name, store_type, city, state, region, store_area_sqm, staff_count,
     open_date_key, effective_start_date_key, effective_end_date_key, is_current, load_batch_id
@@ -81,6 +90,7 @@ WHERE NOT EXISTS (
     SELECT 1 FROM dim_store d WHERE d.store_id = s.store_id AND d.is_current = 1
 );
 
+-- SCD Type 2 untuk dim_product: menutup versi produk lama jika detail produk berubah.
 UPDATE dim_product
 SET is_current = 0,
     effective_end_date_key = CAST(strftime('%Y%m%d', 'now') AS INTEGER)
@@ -101,6 +111,7 @@ WHERE is_current = 1
         )
   );
 
+-- Menambahkan produk baru atau versi produk terbaru ke dim_product.
 INSERT INTO dim_product (
     product_id, product_name, brand, category, subcategory, unit_price, unit_cost, is_active,
     effective_start_date_key, effective_end_date_key, is_current, load_batch_id
@@ -112,6 +123,7 @@ WHERE NOT EXISTS (
     SELECT 1 FROM dim_product d WHERE d.product_id = p.product_id AND d.is_current = 1
 );
 
+-- SCD Type 2 untuk dim_customer: menutup versi customer lama jika atribut profil berubah.
 UPDATE dim_customer
 SET is_current = 0,
     effective_end_date_key = CAST(strftime('%Y%m%d', 'now') AS INTEGER)
@@ -131,6 +143,7 @@ WHERE is_current = 1
         )
   );
 
+-- Menambahkan customer baru atau versi customer terbaru ke dim_customer.
 INSERT INTO dim_customer (
     customer_id, gender, birth_year, age_group, membership_type, city, email, join_date_key,
     effective_start_date_key, effective_end_date_key, is_current, load_batch_id
@@ -142,6 +155,8 @@ WHERE NOT EXISTS (
     SELECT 1 FROM dim_customer d WHERE d.customer_id = c.customer_id AND d.is_current = 1
 );
 
+-- Memuat dimensi promosi. Tabel ini bersifat lookup sederhana,
+-- sehingga hanya insert jika promotion_id belum pernah ada.
 INSERT INTO dim_promotion (promotion_id, promotion_name, promotion_type, discount_rate, start_date_key, end_date_key, load_batch_id)
 SELECT promotion_id, promotion_name, promotion_type, discount_rate, start_date_key, end_date_key, load_batch_id
 FROM trf_promotions p
@@ -149,6 +164,7 @@ WHERE NOT EXISTS (
     SELECT 1 FROM dim_promotion d WHERE d.promotion_id = p.promotion_id
 );
 
+-- Memuat dimensi metode pembayaran dan mencegah duplikasi payment_method_id.
 INSERT INTO dim_payment_method (payment_method_id, payment_type, provider, is_online_supported, load_batch_id)
 SELECT payment_method_id, payment_type, provider, is_online_supported, load_batch_id
 FROM trf_payment_methods p
@@ -156,6 +172,7 @@ WHERE NOT EXISTS (
     SELECT 1 FROM dim_payment_method d WHERE d.payment_method_id = p.payment_method_id
 );
 
+-- Memuat dimensi channel untuk kebutuhan analisis sumber transaksi.
 INSERT INTO dim_channel (channel_id, channel_name, channel_group, description, load_batch_id)
 SELECT channel_id, channel_name, channel_group, description, load_batch_id
 FROM trf_channels c
@@ -163,6 +180,7 @@ WHERE NOT EXISTS (
     SELECT 1 FROM dim_channel d WHERE d.channel_id = c.channel_id
 );
 
+-- SCD Type 2 untuk dim_supplier: menutup versi supplier lama jika atribut supplier berubah.
 UPDATE dim_supplier
 SET is_current = 0,
     effective_end_date_key = CAST(strftime('%Y%m%d', 'now') AS INTEGER)
@@ -181,6 +199,7 @@ WHERE is_current = 1
         )
   );
 
+-- Menambahkan supplier baru atau versi supplier terbaru ke dim_supplier.
 INSERT INTO dim_supplier (
     supplier_id, supplier_name, supplier_type, city, state, lead_time_days,
     effective_start_date_key, effective_end_date_key, is_current, load_batch_id
@@ -192,6 +211,7 @@ WHERE NOT EXISTS (
     SELECT 1 FROM dim_supplier d WHERE d.supplier_id = s.supplier_id AND d.is_current = 1
 );
 
+-- Memuat dimensi fulfilment center untuk order online.
 INSERT INTO dim_fulfilment_center (fulfilment_center_id, fulfilment_center_name, city, state, capacity_orders_per_day, load_batch_id)
 SELECT fulfilment_center_id, fulfilment_center_name, city, state, capacity_orders_per_day, load_batch_id
 FROM trf_fulfilment_centers f
@@ -199,6 +219,7 @@ WHERE NOT EXISTS (
     SELECT 1 FROM dim_fulfilment_center d WHERE d.fulfilment_center_id = f.fulfilment_center_id
 );
 
+-- Memuat dimensi distribution center untuk proses procurement.
 INSERT INTO dim_distribution_center (distribution_center_id, distribution_center_name, city, state, warehouse_area_sqm, load_batch_id)
 SELECT distribution_center_id, distribution_center_name, city, state, warehouse_area_sqm, load_batch_id
 FROM trf_distribution_centers d
@@ -206,24 +227,30 @@ WHERE NOT EXISTS (
     SELECT 1 FROM dim_distribution_center x WHERE x.distribution_center_id = d.distribution_center_id
 );
 
+-- Audit load dim_store: mencatat jumlah row sumber, row yang dimuat,
+-- dan status proses.
 INSERT INTO etl_audit_log (batch_id, process_name, source_table, target_table, rows_extracted, rows_loaded, rows_rejected, status)
 SELECT BATCH_ID(), 'load_dim_store', 'trf_stores', 'dim_store',
        (SELECT COUNT(*) FROM trf_stores),
        (SELECT COUNT(*) FROM dim_store WHERE load_batch_id = BATCH_ID()),
        0, 'SUCCESS';
 
+-- Audit load dim_product.
 INSERT INTO etl_audit_log (batch_id, process_name, source_table, target_table, rows_extracted, rows_loaded, rows_rejected, status)
 SELECT BATCH_ID(), 'load_dim_product', 'trf_products', 'dim_product',
        (SELECT COUNT(*) FROM trf_products),
        (SELECT COUNT(*) FROM dim_product WHERE load_batch_id = BATCH_ID()),
        0, 'SUCCESS';
 
+-- Audit load dim_customer.
 INSERT INTO etl_audit_log (batch_id, process_name, source_table, target_table, rows_extracted, rows_loaded, rows_rejected, status)
 SELECT BATCH_ID(), 'load_dim_customer', 'trf_customers', 'dim_customer',
        (SELECT COUNT(*) FROM trf_customers),
        (SELECT COUNT(*) FROM dim_customer WHERE load_batch_id = BATCH_ID()),
        0, 'SUCCESS';
 
+-- Audit untuk supporting dimensions seperti promotion, payment method,
+-- channel, supplier, fulfilment center, dan distribution center.
 INSERT INTO etl_audit_log (batch_id, process_name, source_table, target_table, rows_extracted, rows_loaded, rows_rejected, status)
 SELECT BATCH_ID(), 'load_supporting_dimensions', 'trf_supporting', 'supporting_dimensions',
        (SELECT COUNT(*) FROM trf_promotions) + (SELECT COUNT(*) FROM trf_payment_methods) +

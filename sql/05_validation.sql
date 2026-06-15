@@ -1,4 +1,9 @@
--- Final warehouse row counts.
+-- File ini berisi query validasi setelah proses ETL selesai.
+-- Query di sini dipakai untuk mengecek jumlah row, isu kualitas data,
+-- penggunaan unknown key, kesiapan SCD Type 2, dan metrik bisnis utama.
+
+-- Mengecek jumlah row akhir pada semua tabel dimensi dan fakta.
+-- Bagian ini membantu memastikan data benar-benar termuat ke warehouse.
 SELECT 'dim_date' AS table_name, COUNT(*) AS row_count FROM dim_date
 UNION ALL SELECT 'dim_store', COUNT(*) FROM dim_store
 UNION ALL SELECT 'dim_product', COUNT(*) FROM dim_product
@@ -15,7 +20,8 @@ UNION ALL SELECT 'fact_inventory_daily', COUNT(*) FROM fact_inventory_daily
 UNION ALL SELECT 'fact_delivery_performance', COUNT(*) FROM fact_delivery_performance
 UNION ALL SELECT 'fact_procurement', COUNT(*) FROM fact_procurement;
 
--- Transform layer row counts.
+-- Mengecek jumlah row pada transform layer.
+-- Hasilnya bisa dibandingkan dengan staging untuk melihat berapa data valid yang lolos.
 SELECT 'trf_stores' AS table_name, COUNT(*) AS row_count FROM trf_stores
 UNION ALL SELECT 'trf_products', COUNT(*) FROM trf_products
 UNION ALL SELECT 'trf_customers', COUNT(*) FROM trf_customers
@@ -31,13 +37,15 @@ UNION ALL SELECT 'trf_inventory', COUNT(*) FROM trf_inventory
 UNION ALL SELECT 'trf_delivery', COUNT(*) FROM trf_delivery
 UNION ALL SELECT 'trf_procurement', COUNT(*) FROM trf_procurement;
 
--- Data-quality classifications by layer and issue type.
+-- Merangkum isu kualitas data berdasarkan layer, jenis issue, dan severity.
+-- Ini memudahkan penjelasan error mana yang paling sering terjadi.
 SELECT layer_name, issue_code, severity, COUNT(*) AS issue_count
 FROM data_quality_issue
 GROUP BY layer_name, issue_code, severity
 ORDER BY layer_name, issue_code;
 
--- Unknown surrogate-key usage in facts.
+-- Mengecek penggunaan unknown surrogate key pada fact table.
+-- Jika nilainya besar, berarti banyak foreign key bisnis yang gagal lookup ke dimensi.
 SELECT 'fact_sales.store_key' AS key_name, COUNT(*) AS unknown_rows FROM fact_sales WHERE store_key = 0
 UNION ALL SELECT 'fact_sales.product_key', COUNT(*) FROM fact_sales WHERE product_key = 0
 UNION ALL SELECT 'fact_sales.customer_key', COUNT(*) FROM fact_sales WHERE customer_key = 0
@@ -45,7 +53,8 @@ UNION ALL SELECT 'fact_online_orders.customer_key', COUNT(*) FROM fact_online_or
 UNION ALL SELECT 'fact_inventory_daily.product_key', COUNT(*) FROM fact_inventory_daily WHERE product_key = 0
 UNION ALL SELECT 'fact_procurement.supplier_key', COUNT(*) FROM fact_procurement WHERE supplier_key = 0;
 
--- SCD Type 2 readiness: current and historical versions.
+-- Mengecek kesiapan SCD Type 2 dengan menghitung current row dan historical row.
+-- Historical row muncul jika ada perubahan atribut pada dimensi yang dilacak.
 SELECT 'dim_store' AS dimension_name,
        SUM(CASE WHEN is_current = 1 THEN 1 ELSE 0 END) AS current_rows,
        SUM(CASE WHEN is_current = 0 THEN 1 ELSE 0 END) AS historical_rows
@@ -66,12 +75,13 @@ SELECT 'dim_supplier',
        SUM(CASE WHEN is_current = 0 THEN 1 ELSE 0 END)
 FROM dim_supplier;
 
--- Load batches and incremental/rebuild history.
+-- Melihat histori batch ETL, mode run, waktu mulai, waktu selesai, dan status.
 SELECT batch_id, run_mode, started_at, completed_at, status
 FROM etl_load_batch
 ORDER BY started_at DESC;
 
--- Fact tables should have no negative business measures after ETL.
+-- Mengecek nilai bisnis negatif yang seharusnya tidak ada setelah proses cleansing.
+-- Contohnya quantity, sales amount, stock, delivery time, atau purchase amount.
 SELECT 'fact_sales' AS table_name, COUNT(*) AS negative_rows
 FROM fact_sales
 WHERE quantity_sold < 0 OR total_sales_amount < 0 OR discount_amount < 0 OR net_sales < 0 OR sales_cost < 0
@@ -92,7 +102,7 @@ SELECT 'fact_procurement', COUNT(*)
 FROM fact_procurement
 WHERE ordered_qty < 0 OR received_qty < 0 OR purchase_amount < 0;
 
--- Sales analysis: total net sales, gross profit, and margin by region.
+-- Analisis sales per region: total net sales, gross profit, dan rata-rata margin.
 SELECT ds.region,
        ROUND(SUM(fs.net_sales), 2) AS total_net_sales,
        ROUND(SUM(fs.gross_profit), 2) AS gross_profit,
@@ -102,7 +112,7 @@ JOIN dim_store ds ON ds.store_key = fs.store_key
 GROUP BY ds.region
 ORDER BY total_net_sales DESC;
 
--- Inventory quality: stock variance and shrinkage by product category.
+-- Analisis inventory per kategori produk: total variance stok dan rata-rata shrinkage.
 SELECT dp.category,
        ROUND(SUM(fid.stock_variance), 2) AS total_stock_variance,
        ROUND(AVG(fid.shrinkage_rate) * 100, 2) AS avg_shrinkage_pct
@@ -111,7 +121,8 @@ JOIN dim_product dp ON dp.product_key = fid.product_key
 GROUP BY dp.category
 ORDER BY ABS(total_stock_variance) DESC;
 
--- Delivery performance.
+-- Analisis performa delivery berdasarkan status pengiriman.
+-- Menghasilkan jumlah delivery, rata-rata delay, dan persentase on-time.
 SELECT delivery_status,
        COUNT(*) AS deliveries,
        ROUND(AVG(delay_hours), 2) AS avg_delay_hours,
@@ -119,7 +130,8 @@ SELECT delivery_status,
 FROM fact_delivery_performance
 GROUP BY delivery_status;
 
--- Procurement supplier performance.
+-- Analisis performa supplier: jumlah PO, total purchase amount,
+-- rata-rata fill rate, dan persentase keterlambatan delivery.
 SELECT ds.supplier_name,
        COUNT(*) AS purchase_orders,
        ROUND(SUM(fp.purchase_amount), 2) AS total_purchase_amount,

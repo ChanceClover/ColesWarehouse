@@ -1,12 +1,15 @@
--- OLAP-style cube views for Power BI or SQL analysis.
--- Run this script against output/coles_warehouse_dw.sqlite after the ETL.
+-- File ini membuat view OLAP/reporting untuk Power BI atau analisis SQL langsung.
+-- Jalankan script ini ke output/coles_warehouse_dw.sqlite setelah ETL selesai.
 
+-- Menghapus view lama agar definisi view selalu mengikuti versi terbaru script ini.
 DROP VIEW IF EXISTS vw_cube_sales;
 DROP VIEW IF EXISTS vw_cube_online_orders;
 DROP VIEW IF EXISTS vw_cube_inventory;
 DROP VIEW IF EXISTS vw_cube_delivery;
 DROP VIEW IF EXISTS vw_cube_procurement;
 
+-- View sales: menggabungkan fact_sales dengan dimensi tanggal, toko, produk,
+-- customer, promosi, payment method, dan channel untuk analisis penjualan.
 CREATE VIEW vw_cube_sales AS
 SELECT
     fs.sales_key,
@@ -59,6 +62,8 @@ LEFT JOIN dim_promotion dpr ON dpr.promotion_key = fs.promotion_key
 JOIN dim_payment_method dpm ON dpm.payment_method_key = fs.payment_method_key
 JOIN dim_channel dch ON dch.channel_key = fs.channel_key;
 
+-- View online orders: menggabungkan order online dengan customer,
+-- fulfilment center, channel, dan tanggal order.
 CREATE VIEW vw_cube_online_orders AS
 SELECT
     foo.online_order_key,
@@ -94,6 +99,8 @@ JOIN dim_customer dc ON dc.customer_key = foo.customer_key
 JOIN dim_fulfilment_center dfc ON dfc.fulfilment_center_key = foo.fulfilment_center_key
 JOIN dim_channel dch ON dch.channel_key = foo.channel_key;
 
+-- View inventory: menggabungkan stok harian dengan tanggal, toko, dan produk.
+-- Cocok untuk analisis stock movement, variance, dan shrinkage.
 CREATE VIEW vw_cube_inventory AS
 SELECT
     fid.inventory_key,
@@ -129,6 +136,8 @@ JOIN dim_date dd ON dd.date_key = fid.snapshot_date_key
 JOIN dim_store ds ON ds.store_key = fid.store_key
 JOIN dim_product dp ON dp.product_key = fid.product_key;
 
+-- View delivery: menggabungkan performa pengiriman dengan online order,
+-- tanggal promised/actual, channel, dan fulfilment center.
 CREATE VIEW vw_cube_delivery AS
 SELECT
     fdp.delivery_key,
@@ -159,6 +168,8 @@ JOIN dim_date actual ON actual.date_key = fdp.actual_date_key
 JOIN dim_channel dch ON dch.channel_key = foo.channel_key
 JOIN dim_fulfilment_center dfc ON dfc.fulfilment_center_key = foo.fulfilment_center_key;
 
+-- View procurement: menggabungkan purchase order dengan tanggal,
+-- supplier, distribution center, dan produk.
 CREATE VIEW vw_cube_procurement AS
 SELECT
     fp.procurement_key,

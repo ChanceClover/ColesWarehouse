@@ -1,3 +1,8 @@
+-- File ini membuat transform layer dari data staging yang valid.
+-- Di tahap ini data-quality issue dicatat, nilai standar diterapkan,
+-- dan beberapa atribut turunan seperti date key serta business measure dihitung.
+
+-- Menghapus transform table lama agar hasil transformasi run terbaru tidak bercampur.
 DROP TABLE IF EXISTS trf_stores;
 DROP TABLE IF EXISTS trf_products;
 DROP TABLE IF EXISTS trf_customers;
@@ -13,6 +18,9 @@ DROP TABLE IF EXISTS trf_inventory;
 DROP TABLE IF EXISTS trf_delivery;
 DROP TABLE IF EXISTS trf_procurement;
 
+-- Mencatat semua row staging yang tidak valid ke tabel data_quality_issue.
+-- Issue diklasifikasikan agar mudah dijelaskan: missing key, duplicate key,
+-- invalid date, invalid measure, atau staging reject umum.
 INSERT INTO data_quality_issue (batch_id, layer_name, source_table, source_id, issue_code, issue_message, severity)
 SELECT BATCH_ID(), 'staging', source_table, source_id,
        CASE
@@ -41,12 +49,15 @@ FROM (
     UNION ALL SELECT 'raw_purchase_orders', purchase_order_id, error_reason FROM stg_procurement WHERE is_valid = 0
 );
 
+-- Menyalin data-quality issue staging ke etl_error_log untuk kebutuhan audit error.
 INSERT INTO etl_error_log (batch_id, source_table, source_id, error_type, error_description)
 SELECT batch_id, source_table, source_id, issue_code, issue_message
 FROM data_quality_issue
 WHERE batch_id = BATCH_ID()
   AND layer_name = 'staging';
 
+-- Transform toko: hanya mengambil row valid, memberi default value,
+-- dan membuat open_date_key untuk relasi ke dim_date.
 CREATE TABLE trf_stores AS
 SELECT
     source_row_id,
@@ -67,6 +78,7 @@ LEFT JOIN map_standard_value m
    AND m.raw_value = LOWER(s.store_type)
 WHERE s.is_valid = 1;
 
+-- Transform produk: menerapkan standar kategori dan menghitung margin standar produk.
 CREATE TABLE trf_products AS
 SELECT
     source_row_id,
@@ -86,6 +98,7 @@ LEFT JOIN map_standard_value m
    AND m.raw_value = LOWER(p.category)
 WHERE p.is_valid = 1;
 
+-- Transform customer: menjaga atribut customer valid dan membuat join_date_key.
 CREATE TABLE trf_customers AS
 SELECT
     source_row_id,
@@ -102,6 +115,7 @@ SELECT
 FROM stg_customers
 WHERE is_valid = 1;
 
+-- Transform promosi: menerapkan standar tipe promosi dan membuat start/end date key.
 CREATE TABLE trf_promotions AS
 SELECT
     source_row_id,
@@ -120,6 +134,8 @@ LEFT JOIN map_standard_value m
    AND m.raw_value = LOWER(p.promotion_type)
 WHERE p.is_valid = 1;
 
+-- Transform metode pembayaran: menyimpan payment type, provider,
+-- dan flag apakah bisa dipakai untuk transaksi online.
 CREATE TABLE trf_payment_methods AS
 SELECT
     source_row_id,
@@ -131,6 +147,7 @@ SELECT
 FROM stg_payment_methods
 WHERE is_valid = 1;
 
+-- Transform channel: menerapkan standar nama channel untuk analisis channel penjualan.
 CREATE TABLE trf_channels AS
 SELECT
     source_row_id,
@@ -145,6 +162,7 @@ LEFT JOIN map_standard_value m
    AND m.raw_value = LOWER(c.channel_name)
 WHERE c.is_valid = 1;
 
+-- Transform supplier: menyimpan data supplier valid untuk dimensi supplier.
 CREATE TABLE trf_suppliers AS
 SELECT
     source_row_id,
@@ -158,6 +176,7 @@ SELECT
 FROM stg_suppliers
 WHERE is_valid = 1;
 
+-- Transform fulfilment center: menyimpan pusat fulfilment valid untuk order online.
 CREATE TABLE trf_fulfilment_centers AS
 SELECT
     source_row_id,
@@ -170,6 +189,7 @@ SELECT
 FROM stg_fulfilment_centers
 WHERE is_valid = 1;
 
+-- Transform distribution center: menyimpan distribution center valid untuk procurement.
 CREATE TABLE trf_distribution_centers AS
 SELECT
     source_row_id,
@@ -182,6 +202,8 @@ SELECT
 FROM stg_distribution_centers
 WHERE is_valid = 1;
 
+-- Transform sales: menghitung total sales, net sales, gross profit,
+-- margin, dan discount percentage dari transaksi penjualan.
 CREATE TABLE trf_sales AS
 SELECT
     source_row_id,
@@ -208,6 +230,7 @@ SELECT
 FROM stg_sales
 WHERE is_valid = 1;
 
+-- Transform online orders: menghitung total order value dan menjaga status fulfilment.
 CREATE TABLE trf_online_orders AS
 SELECT
     source_row_id,
@@ -230,6 +253,8 @@ LEFT JOIN map_standard_value m
    AND m.raw_value = LOWER(o.order_status)
 WHERE o.is_valid = 1;
 
+-- Transform inventory: menghitung variance stok, nilai absolut variance,
+-- dan shrinkage rate sebagai indikator kualitas stok.
 CREATE TABLE trf_inventory AS
 SELECT
     source_row_id,
@@ -251,6 +276,7 @@ SELECT
 FROM stg_inventory
 WHERE is_valid = 1;
 
+-- Transform delivery: menghitung delay dalam menit/jam dan flag on-time delivery.
 CREATE TABLE trf_delivery AS
 SELECT
     source_row_id,
@@ -274,6 +300,8 @@ LEFT JOIN map_standard_value m
    AND m.raw_value = LOWER(d.delivery_status)
 WHERE d.is_valid = 1;
 
+-- Transform procurement: menghitung fill rate, delay receipt,
+-- dan flag keterlambatan penerimaan barang.
 CREATE TABLE trf_procurement AS
 SELECT
     source_row_id,
@@ -305,6 +333,8 @@ LEFT JOIN map_standard_value m
    AND m.raw_value = LOWER(p.po_status)
 WHERE p.is_valid = 1;
 
+-- Mencatat ringkasan audit transform layer: jumlah row valid yang dimuat
+-- dan jumlah row yang ditolak dari staging.
 INSERT INTO etl_audit_log (batch_id, process_name, source_table, target_table, rows_extracted, rows_loaded, rows_rejected, status)
 SELECT BATCH_ID(), 'transform_layer', NULL, 'trf_*',
        (SELECT COUNT(*) FROM stg_stores) + (SELECT COUNT(*) FROM stg_products) + (SELECT COUNT(*) FROM stg_customers) +
