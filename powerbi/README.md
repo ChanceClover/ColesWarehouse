@@ -1,75 +1,43 @@
 # Power BI Implementation
 
-Use this folder to prepare the Power BI dashboard layer.
+Folder ini berisi exporter dan panduan untuk dashboard Power BI tiga halaman.
 
 ## Export Data
 
-Run ETL first:
+Jalankan pipeline lengkap:
 
 ```powershell
-python .\run_etl.py
+.\.venv\Scripts\python.exe .\run_project.py
 ```
 
-Create cube views:
+Atau jalankan exporter setelah ETL:
 
 ```powershell
-python .\cube\run_cube.py
+.\.venv\Scripts\python.exe .\powerbi\export_powerbi.py
 ```
 
-Export Power BI-ready CSV files:
-
-```powershell
-python .\powerbi\export_powerbi.py
-```
-
-`export_powerbi.py` also creates or refreshes the cube views automatically, so the separate cube command is optional.
-
-The CSV files are created in:
-
-`output\powerbi`
-
-## Recommended Power BI Model
-
-For the proper star schema model, import these tables:
+File dibuat di `output/powerbi/`. Exporter menghapus CSV lama sebelum menghasilkan 10 tabel final:
 
 - `dim_date`
 - `dim_store`
 - `dim_product`
 - `dim_customer`
-- `dim_promotion`
-- `dim_payment_method`
 - `dim_channel`
-- `dim_supplier`
 - `dim_fulfilment_center`
-- `dim_distribution_center`
 - `fact_sales`
 - `fact_online_orders`
 - `fact_inventory_daily`
 - `fact_delivery_performance`
-- `fact_procurement`
 
-Use one-to-many relationships from dimensions to facts. Keep relationship direction single from dimension to fact.
+Jangan impor `trf_*`, ETL log, procurement, atau cube views ke dashboard final.
 
-For an ETL health page, also import:
+## Build Order
 
-- `etl_load_batch`
-- `etl_audit_log`
-- `etl_error_log`
-- `data_quality_issue`
-- `map_standard_value`
+1. Import 10 CSV dengan **Get Data > Text/CSV**.
+2. Pastikan numeric columns menggunakan Decimal Number atau Whole Number yang sesuai.
+3. Buat relationship berdasarkan `model_relationships.md`.
+4. Buat measure pada satu Measure Table berdasarkan `dax_measures.md`.
+5. Bangun tiga halaman berdasarkan `dashboard_blueprint.md`.
+6. Uji slicer, totals, cross-filtering, dan format measure.
 
-## Quick Cube Option
-
-For fast dashboard building, import the cube views:
-
-- `vw_cube_sales`
-- `vw_cube_online_orders`
-- `vw_cube_inventory`
-- `vw_cube_delivery`
-- `vw_cube_procurement`
-
-These are flattened analytical views. They are easier for screenshots and demonstrations, but the star schema is better for explaining data warehouse design.
-
-## Exported Transform Tables
-
-The export also includes `trf_*` tables. They are not required for the main dashboard, but they are useful when explaining the ETL process because they show the clean transform layer between staging and final warehouse tables.
+Khusus `fact_inventory_daily[shrinkage_rate]`, gunakan tipe **Decimal Number**, lalu format measure sebagai Percentage.

@@ -1,69 +1,83 @@
-# Dashboard Blueprint
+# Power BI Dashboard Blueprint
 
-## Page 1: Executive Overview
+## Page 1 - Omnichannel Executive Overview
 
-Purpose: Show overall retail and warehouse performance.
+Tujuan: memberikan ringkasan performa penjualan dan operasional omnichannel.
 
-Visuals:
+KPI cards:
 
-- KPI cards: `Net Sales`, `Gross Profit`, `Gross Margin %`, `Total Online Order Value`
-- Line chart: `Net Sales` by `dim_date[month_name]`
-- Bar chart: `Net Sales` by `dim_store[region]`
-- Donut chart: `Net Sales` by `dim_channel[channel_name]`
-- Table: top product categories by `Net Sales`
-
-## Page 2: Sales & Omnichannel
-
-Purpose: Compare store, eCommerce, mobile, home delivery, and click-and-collect performance.
+- Net Sales
+- Gross Margin %
+- Sales Transactions
+- Total Online Order Value
+- Fulfillment Rate %
+- On Time Delivery %
+- Average Shrinkage %
 
 Visuals:
 
-- Column chart: `Net Sales` by `dim_channel[channel_name]`
-- Matrix: `dim_store[region]` x `dim_product[category]` with `Net Sales`
-- Bar chart: `Quantity Sold` by product category
-- Slicers: year, region, channel, category
+- Line chart: Net Sales by Month
+- Bar chart: Net Sales by Channel
+- Donut chart: Channel Contribution
+- Matrix: Channel x Product Category dengan Net Sales
 
-## Page 3: Inventory
+Slicers:
 
-Purpose: Track stock movement and stock variance.
+- Channel
+- Product Category
+- Region
 
-Visuals:
+## Page 2 - Customer & Channel Behaviour
 
-- KPI cards: `Closing Stock`, `Stock Variance`, `Average Shrinkage %`
-- Line chart: closing stock by month
-- Bar chart: stock loss by region
-- Table: product/store combinations with largest stock variance
+Tujuan: menunjukkan channel dan customer segment yang menghasilkan transaksi.
 
-## Page 4: Delivery & Fulfillment
+KPI cards:
 
-Purpose: Evaluate online order fulfillment and delivery reliability.
-
-Visuals:
-
-- KPI cards: `Fulfillment Rate %`, `On Time Delivery %`, `Average Delay Hours`
-- Bar chart: deliveries by delivery status
-- Column chart: on-time delivery by fulfilment center
-- Table: late deliveries with delay minutes
-
-## Page 5: Procurement
-
-Purpose: Analyze supplier performance and purchasing cost.
+- Sales Transactions
+- Net Sales
+- Average Transaction Value
 
 Visuals:
 
-- KPI cards: `Total Purchase Amount`, `Late Procurement %`, `Average Supplier Fill Rate %`
-- Bar chart: purchase amount by supplier
-- Bar chart: late delivery percentage by supplier
-- Matrix: supplier type x product category
+- Bar chart: Sales Transactions by Age Group
+- Bar chart: Net Sales by Membership Type
+- Bar chart: Net Sales by Channel
+- Matrix: Channel x Membership Type dengan Net Sales
 
-## Page 6: ETL Health
+Slicers:
 
-Purpose: Show that the warehouse has traceable loads, quality checks, and rejected-row handling.
+- Channel
+- Membership Type
+- Age Group
+- Product Category
+
+`None` berarti customer valid yang bukan member. `Unknown` berarti customer tidak berhasil dipetakan saat ETL.
+
+## Page 3 - Fulfilment & Inventory Support
+
+Tujuan: mengukur kualitas order online, delivery, dan ketersediaan inventory.
+
+KPI cards:
+
+- Online Orders
+- Total Online Order Value
+- Fulfillment Rate %
+- On Time Delivery %
+- Average Delay Hours
+- Average Shrinkage %
 
 Visuals:
 
-- KPI cards: `Data Quality Issues`, `Hard Rejects`, `Lookup Warnings`
-- Table: latest `etl_load_batch` records with run mode and status
-- Bar chart: issue count by `data_quality_issue[issue_code]`
-- Matrix: `data_quality_issue[layer_name]` x `data_quality_issue[severity]`
-- Table: `etl_audit_log` process counts
+- Bar chart: On Time Delivery % by Delivery Partner
+- Bar chart: On Time Delivery % by Fulfilment Center
+- Bar chart: Total Stock Loss by Product Category
+- Table: Region, Store, Category, Closing Stock, Stock Loss, dan Average Shrinkage %
+
+Slicers:
+
+- Channel
+- Product Category
+- Region
+- Fulfilment Center
+
+Absolute Stock Variance tidak ditampilkan karena seluruh record saat ini berhasil direkonsiliasi dan menghasilkan variance `0`.

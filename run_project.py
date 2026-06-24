@@ -15,7 +15,7 @@ def run_step(label, command):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Run the full Coles data warehouse final-project pipeline."
+        description="Run the Coles warehouse, validation, and Power BI export pipeline."
     )
     parser.add_argument(
         "--incremental",
@@ -36,17 +36,14 @@ def main():
 
     run_step("1. Build warehouse", etl_command)
     run_step("2. Run validation reports", [python, "run_validation.py"])
-    run_step("3. Create cube views", [python, "cube/run_cube.py"])
-    run_step("4. Generate HTML dashboard", [python, "run_dashboard.py"])
 
     if not args.skip_powerbi:
-        run_step("5. Export Power BI-ready files", [python, "powerbi/export_powerbi.py"])
+        run_step("3. Export Power BI-ready files", [python, "powerbi/export_powerbi.py"])
 
     print()
     print("Final project pipeline complete.")
     print(f"Warehouse database: {ROOT / 'output' / 'coles_warehouse_dw.sqlite'}")
     print(f"Validation summary: {ROOT / 'output' / 'validation_summary.md'}")
-    print(f"HTML dashboard: {ROOT / 'output' / 'dashboard.html'}")
     if not args.skip_powerbi:
         print(f"Power BI CSV folder: {ROOT / 'output' / 'powerbi'}")
 

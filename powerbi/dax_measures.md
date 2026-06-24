@@ -1,10 +1,8 @@
 # DAX Measures
 
-Create these measures in Power BI.
+Buat satu table khusus bernama `Measure Table`, lalu tambahkan measure berikut.
 
-```DAX
-Total Sales = SUM(fact_sales[total_sales_amount])
-```
+## Sales dan Customer
 
 ```DAX
 Net Sales = SUM(fact_sales[net_sales])
@@ -19,39 +17,62 @@ Gross Margin % = DIVIDE([Gross Profit], [Net Sales])
 ```
 
 ```DAX
-Quantity Sold = SUM(fact_sales[quantity_sold])
+Sales Transactions = DISTINCTCOUNT(fact_sales[transaction_id])
 ```
 
 ```DAX
-Average Order Value = AVERAGE(fact_online_orders[order_value])
+Average Transaction Value = DIVIDE([Net Sales], [Sales Transactions])
+```
+
+## Online Orders
+
+```DAX
+Total Online Order Value = SUM(fact_online_orders[total_order_value])
 ```
 
 ```DAX
-Total Online Order Value = SUM(fact_online_orders[order_value])
+Online Orders = COUNTROWS(fact_online_orders)
 ```
 
 ```DAX
-Total Order Value With Fees = SUM(fact_online_orders[total_order_value])
+Fulfilled Orders =
+CALCULATE(
+    COUNTROWS(fact_online_orders),
+    fact_online_orders[fulfilled_flag] = 1
+)
 ```
 
 ```DAX
-Fulfilled Orders = CALCULATE(COUNTROWS(fact_online_orders), fact_online_orders[fulfilled_flag] = 1)
+Fulfillment Rate % = DIVIDE([Fulfilled Orders], [Online Orders])
+```
+
+## Delivery
+
+```DAX
+On Time Deliveries =
+CALCULATE(
+    COUNTROWS(fact_delivery_performance),
+    fact_delivery_performance[on_time_flag] = 1
+)
 ```
 
 ```DAX
-Fulfillment Rate % = DIVIDE([Fulfilled Orders], COUNTROWS(fact_online_orders))
+On Time Delivery % =
+DIVIDE([On Time Deliveries], COUNTROWS(fact_delivery_performance))
 ```
+
+```DAX
+Average Delay Hours = AVERAGE(fact_delivery_performance[delay_hours])
+```
+
+## Inventory
 
 ```DAX
 Closing Stock = SUM(fact_inventory_daily[closing_stock])
 ```
 
 ```DAX
-Stock Variance = SUM(fact_inventory_daily[stock_variance])
-```
-
-```DAX
-Absolute Stock Variance = SUM(fact_inventory_daily[stock_variance_abs])
+Total Stock Loss = SUM(fact_inventory_daily[stock_loss])
 ```
 
 ```DAX
@@ -59,45 +80,7 @@ Average Shrinkage % = AVERAGE(fact_inventory_daily[shrinkage_rate])
 ```
 
 ```DAX
-On Time Deliveries = CALCULATE(COUNTROWS(fact_delivery_performance), fact_delivery_performance[on_time_flag] = 1)
+Shrinkage Gauge Maximum = 0.05
 ```
 
-```DAX
-On Time Delivery % = DIVIDE([On Time Deliveries], COUNTROWS(fact_delivery_performance))
-```
-
-```DAX
-Average Delay Minutes = AVERAGE(fact_delivery_performance[delay_minutes])
-```
-
-```DAX
-Average Delay Hours = AVERAGE(fact_delivery_performance[delay_hours])
-```
-
-```DAX
-Total Purchase Amount = SUM(fact_procurement[purchase_amount])
-```
-
-```DAX
-Average Supplier Fill Rate % = AVERAGE(fact_procurement[fill_rate])
-```
-
-```DAX
-Late Procurement Deliveries = CALCULATE(COUNTROWS(fact_procurement), fact_procurement[late_delivery_flag] = 1)
-```
-
-```DAX
-Late Procurement % = DIVIDE([Late Procurement Deliveries], COUNTROWS(fact_procurement))
-```
-
-```DAX
-Data Quality Issues = COUNTROWS(data_quality_issue)
-```
-
-```DAX
-Hard Rejects = CALCULATE(COUNTROWS(data_quality_issue), data_quality_issue[severity] = "ERROR")
-```
-
-```DAX
-Lookup Warnings = CALCULATE(COUNTROWS(data_quality_issue), data_quality_issue[issue_code] = "LOOKUP_NOT_FOUND")
-```
+Format `Gross Margin %`, `Fulfillment Rate %`, `On Time Delivery %`, dan `Average Shrinkage %` sebagai Percentage. Format sales dan order value sebagai Currency.
